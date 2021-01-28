@@ -1,7 +1,6 @@
 ﻿#include "pch.h"
 
-//#undef GetEnvironmentVariableW
-#include <winrt/Microsoft.Process.Environment.h>
+using namespace winrt::Microsoft::Process::Environment;
 
 class EnvironmentTests
 {
@@ -15,11 +14,8 @@ void EnvironmentTests::GetEvForProcess()
     const std::wstring EV_NAME = L"MyVariable";
     SetEnvironmentVariable(EV_NAME.c_str(), L"IAmCool");
 
-
-    MessageBoxEx(NULL, L"In there", L"In there", 0, 0);
-
-    
-    auto yolo = winrt::Microsoft::Process::Environment::EnvironmentManager::GetForProcess();
+    //MessageBoxEx(NULL, L"In there", L"In here", 0, 0);
+    auto yolo = EnvironmentManager::GetForProcess();
     yolo.GetEnvironmentVariable(EV_NAME);
 
     SetEnvironmentVariable(L"MyVariable", L"");

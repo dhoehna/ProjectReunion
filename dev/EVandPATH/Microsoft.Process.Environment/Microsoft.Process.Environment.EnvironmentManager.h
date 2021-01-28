@@ -1,18 +1,19 @@
 ﻿#pragma once
 #include "EnvironmentManager.g.h"
 
+
 namespace winrt::Microsoft::Process::Environment::implementation
 {
     struct EnvironmentManager : EnvironmentManagerT<EnvironmentManager>
     {
-    public:
-
         enum Scope
         {
             Process,
             User,
             Machine
         };
+
+        EnvironmentManager(Scope scope);
 
         static Microsoft::Process::Environment::EnvironmentManager GetForProcess();
         static Microsoft::Process::Environment::EnvironmentManager GetForCurrentUser();
@@ -25,9 +26,8 @@ namespace winrt::Microsoft::Process::Environment::implementation
         void AppendToPathExt(hstring const& path);
         void RemoveFromPathExt(hstring const& path);
 
-        Scope m_Scope;
-
-        EnvironmentManager(Scope scope);
+    private :
+        Scope m_scope;
     };
 }
 namespace winrt::Microsoft::Process::Environment::factory_implementation

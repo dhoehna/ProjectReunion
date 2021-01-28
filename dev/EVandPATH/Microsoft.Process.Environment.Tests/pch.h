@@ -1,10 +1,8 @@
 ﻿#pragma once
-
-#include <collection.h>
-#include <ppltasks.h>
-#include "WexTestClass.h"
-
-//#include <winuser.h>
+#include <WexTestClass.h>
+#include <winrt/Microsoft.Process.Environment.h>
 
 #include <wil/cppwinrt.h>
 #include <wil/result.h>
+
+//#include <Windows.h>
