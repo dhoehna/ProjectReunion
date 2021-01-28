@@ -1,0 +1,32 @@
+﻿//  Copyright (c) Microsoft Corporation. All rights reserved.
+
+namespace Microsoft.Process.Environment
+{
+    [contractversion(1.0)]
+    apicontract EnvironmentContract{};
+
+    [contract(EnvironmentContract, 1.0)]
+    runtimeclass EnvironmentManager
+    {
+        static EnvironmentManager GetForProcess();
+        static EnvironmentManager GetForCurrentUser();
+        static EnvironmentManager GetForMachine();
+
+        String GetEnvironmentVariable(String name);
+
+        Windows.Foundation.Collections.IMapView<String, String> GetEnvironmentVariables();
+
+        // Set environment variable and call appropriate Shell refresh triggers
+        void SetEnvironmentVariable(
+            String name,
+            String value);
+
+        void AppendToPath(String path);
+
+        // Removes the final instance of path from the PATH variable
+        void RemoveFromPath(String path);
+
+        void AppendToPathExt(String path);
+        void RemoveFromPathExt(String path);
+    }
+}
