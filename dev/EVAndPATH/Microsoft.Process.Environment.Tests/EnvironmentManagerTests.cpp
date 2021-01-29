@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 
 #include <WexTestClass.h>
+#include <winrt/Microsoft.Process.Environment.h>
 
 class EnvironmentTests
 {

@@ -7,9 +7,9 @@
     <CppWinRTGenerateWindowsMetadata>true</CppWinRTGenerateWindowsMetadata>
     <MinimalCoreWin>true</MinimalCoreWin>
     <VCProjectVersion>15.0</VCProjectVersion>
-    <ProjectGuid>{6e6669e6-48fb-4670-a17c-8dbe862ee27e}</ProjectGuid>
+    <ProjectGuid>{a1c2418c-2e6d-4cf3-93fc-28831f1be9e3}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>EnvironmentManagerTests</RootNamespace>
+    <RootNamespace>Microsoft_Process_Environment_Tests</RootNamespace>
     <WindowsTargetPlatformVersion Condition=" '$(WindowsTargetPlatformVersion)' == '' ">10.0.19041.0</WindowsTargetPlatformVersion>
     <WindowsTargetPlatformMinVersion>10.0.17134.0</WindowsTargetPlatformMinVersion>
   </PropertyGroup>
@@ -116,16 +116,17 @@
     </Text>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\EnvironmentManager\EnvironmentManager.vcxproj">
-      <Project>{f3a64fed-1e20-4b63-b2f6-2d1b50316958}</Project>
+    <ProjectReference Include="..\Microsoft.Process.Environment\Microsoft.Process.Environment.vcxproj">
+      <Project>{8afc0b4f-ebad-42cd-9247-a71fd43d3be3}</Project>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="..\..\..\packages\Microsoft.Windows.CppWinRT.2.0.210122.3\build\native\Microsoft.Windows.CppWinRT.targets" Condition="Exists('..\..\..\packages\Microsoft.Windows.CppWinRT.2.0.210122.3\build\native\Microsoft.Windows.CppWinRT.targets')" />
     <Import Project="..\..\..\packages\Microsoft.Windows.ImplementationLibrary.1.0.201120.3\build\native\Microsoft.Windows.ImplementationLibrary.targets" Condition="Exists('..\..\..\packages\Microsoft.Windows.ImplementationLibrary.1.0.201120.3\build\native\Microsoft.Windows.ImplementationLibrary.targets')" />
-    <Import Project="..\..\..\packages\Taef.Redist.Wlk.10.52.200221001\build\Taef.Redist.Wlk.targets" Condition="Exists('..\..\..\packages\Taef.Redist.Wlk.10.52.200221001\build\Taef.Redist.Wlk.targets')" />
     <Import Project="..\..\..\packages\Taef.TestAdapter.10.57.201103002-develop\build\Taef.TestAdapter.targets" Condition="Exists('..\..\..\packages\Taef.TestAdapter.10.57.201103002-develop\build\Taef.TestAdapter.targets')" />
+    <Import Project="..\..\..\packages\Taef.Redist.Wlk.10.57.201103001\build\Taef.Redist.Wlk.targets" Condition="Exists('..\..\..\packages\Taef.Redist.Wlk.10.57.201103001\build\Taef.Redist.Wlk.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -134,7 +135,7 @@
     <Error Condition="!Exists('..\..\..\packages\Microsoft.Windows.CppWinRT.2.0.210122.3\build\native\Microsoft.Windows.CppWinRT.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\packages\Microsoft.Windows.CppWinRT.2.0.210122.3\build\native\Microsoft.Windows.CppWinRT.props'))" />
     <Error Condition="!Exists('..\..\..\packages\Microsoft.Windows.CppWinRT.2.0.210122.3\build\native\Microsoft.Windows.CppWinRT.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\packages\Microsoft.Windows.CppWinRT.2.0.210122.3\build\native\Microsoft.Windows.CppWinRT.targets'))" />
     <Error Condition="!Exists('..\..\..\packages\Microsoft.Windows.ImplementationLibrary.1.0.201120.3\build\native\Microsoft.Windows.ImplementationLibrary.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\packages\Microsoft.Windows.ImplementationLibrary.1.0.201120.3\build\native\Microsoft.Windows.ImplementationLibrary.targets'))" />
-    <Error Condition="!Exists('..\..\..\packages\Taef.Redist.Wlk.10.52.200221001\build\Taef.Redist.Wlk.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\packages\Taef.Redist.Wlk.10.52.200221001\build\Taef.Redist.Wlk.targets'))" />
     <Error Condition="!Exists('..\..\..\packages\Taef.TestAdapter.10.57.201103002-develop\build\Taef.TestAdapter.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\packages\Taef.TestAdapter.10.57.201103002-develop\build\Taef.TestAdapter.targets'))" />
+    <Error Condition="!Exists('..\..\..\packages\Taef.Redist.Wlk.10.57.201103001\build\Taef.Redist.Wlk.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\packages\Taef.Redist.Wlk.10.57.201103001\build\Taef.Redist.Wlk.targets'))" />
   </Target>
 </Project>
