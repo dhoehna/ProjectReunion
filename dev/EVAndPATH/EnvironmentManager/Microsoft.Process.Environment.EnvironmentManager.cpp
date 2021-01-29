@@ -1,6 +1,6 @@
 ﻿#include "pch.h"
 #include "Microsoft.Process.Environment.EnvironmentManager.h"
-#include "EnvironmentManager.g.cpp"
+#include "Microsoft.Process.Environment.EnvironmentManager.g.cpp"
 
 
 namespace winrt::Microsoft::Process::Environment::implementation

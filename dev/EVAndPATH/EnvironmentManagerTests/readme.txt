@@ -1,5 +1,5 @@
 ========================================================================
-    C++/WinRT Microsoft.Process.Environment Project Overview
+    C++/WinRT EnvironmentManagerTests Project Overview
 ========================================================================
 
 This project demonstrates how to get started consuming Windows Runtime 

@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "EnvironmentManager.g.h"
+#include "Microsoft.Process.Environment.EnvironmentManager.g.h"
 
 
 namespace winrt::Microsoft::Process::Environment::implementation
@@ -26,7 +26,7 @@ namespace winrt::Microsoft::Process::Environment::implementation
         void AppendToPathExt(hstring const& path);
         void RemoveFromPathExt(hstring const& path);
 
-    private :
+    private:
         Scope m_Scope;
     };
 }
