@@ -5,9 +5,25 @@
 
 namespace winrt::Microsoft::Process::Environment::implementation
 {
+    EnvironmentManager::EnvironmentManager(Scope const& scope)
+        : m_Scope(scope) { }
+
     Microsoft::Process::Environment::EnvironmentManager EnvironmentManager::GetForProcess()
     {
-        throw hresult_not_implemented();
+        MessageBoxEx(nullptr, L"In here", L"In here", 0, 0);
+        Environment::EnvironmentManager yolo{ nullptr };
+        yolo = winrt::make<Environment::implementation::EnvironmentManager>(Scope::Process);
+
+        return yolo;
+        //auto yolo{ Microsoft::Process::Environment::implementation::EnvironmentManager() };
+        //return yolo;
+        // Adding a default constructor did not help.
+
+        //return winrt::make<winrt::Microsoft::Process::Environment::EnvironmentManager>();
+
+        //return winrt::Microsoft::Process::Environment::implementation::EnvironmentManager;
+        //return winrt::make<winrt::Microsoft::Process::Environment::implementation::EnvironmentManager>(Scope::Process);
+        //return winrt::make<winrt::Microsoft::Process::Environment::EnvironmentManager>(Scope::Process);
     }
     Microsoft::Process::Environment::EnvironmentManager EnvironmentManager::GetForCurrentUser()
     {

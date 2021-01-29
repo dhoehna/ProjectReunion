@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 
-using namespace winrt::Microsoft::Process::Environment;
+#include <WexTestClass.h>
+#include <winrt/Microsoft.Process.Environment.h>
 
 class EnvironmentTests
 {
@@ -14,8 +15,8 @@ void EnvironmentTests::GetEvForProcess()
     const std::wstring EV_NAME = L"MyVariable";
     SetEnvironmentVariable(EV_NAME.c_str(), L"IAmCool");
 
-    //MessageBoxEx(NULL, L"In there", L"In here", 0, 0);
-    auto yolo = EnvironmentManager::GetForProcess();
+    MessageBoxEx(NULL, L"In there", L"In here", 0, 0);
+    auto yolo = winrt::Microsoft::Process::Environment::EnvironmentManager::GetForProcess();
     yolo.GetEnvironmentVariable(EV_NAME);
 
     SetEnvironmentVariable(L"MyVariable", L"");

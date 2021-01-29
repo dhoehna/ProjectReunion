@@ -13,7 +13,7 @@ namespace winrt::Microsoft::Process::Environment::implementation
             Machine
         };
 
-        EnvironmentManager(Scope scope);
+        EnvironmentManager(Scope const& scope);
 
         static Microsoft::Process::Environment::EnvironmentManager GetForProcess();
         static Microsoft::Process::Environment::EnvironmentManager GetForCurrentUser();
@@ -27,7 +27,7 @@ namespace winrt::Microsoft::Process::Environment::implementation
         void RemoveFromPathExt(hstring const& path);
 
     private :
-        Scope m_scope;
+        Scope m_Scope;
     };
 }
 namespace winrt::Microsoft::Process::Environment::factory_implementation
