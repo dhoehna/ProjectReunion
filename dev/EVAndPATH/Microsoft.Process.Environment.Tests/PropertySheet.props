@@ -4,4 +4,13 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup />
   <ItemDefinitionGroup />
+  <ItemGroup />
+  <ItemGroup>
+    <Reference Include="$(SolutionDir)BuildOutput\$(Configuration)\$(PlatformShortName)\Microsoft.Process.Environment\Microsoft.Process.Environment.winmd">
+      <IsWinMDFile>true</IsWinMDFile>
+    </Reference>
+    <ReferenceCopyLocalPaths Include="$(SolutionDir)BuildOutput\$(Configuration)\$(PlatformShortName)\Microsoft.Process.Environment\Microsoft.Process.Environment.dll">
+      <IsWinMDFile>false</IsWinMDFile>
+    </ReferenceCopyLocalPaths>
+  </ItemGroup>
 </Project>

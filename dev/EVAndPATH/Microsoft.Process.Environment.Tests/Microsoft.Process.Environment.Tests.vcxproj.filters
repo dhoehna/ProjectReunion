@@ -11,6 +11,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="PropertySheet.props" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="readme.txt" />
@@ -19,5 +20,8 @@
     <Filter Include="Source Files">
       <UniqueIdentifier>{be69c479-0556-49af-a773-aec17734b9d6}</UniqueIdentifier>
     </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="Microsoft.Process.Environment.Tests.dll.manifest" />
   </ItemGroup>
 </Project>
