@@ -6,10 +6,10 @@
   <ItemDefinitionGroup />
   <ItemGroup />
   <ItemGroup>
-    <Reference Include="$(SolutionDir)BuildOutput\$(Configuration)\$(PlatformShortName)\Microsoft.Process.Environment\Microsoft.Process.Environment.winmd">
+    <Reference Include="$(SolutionDir)dev\EVAndPATH\$(Configuration)\$(PlatformShortName)\Microsoft.Process.Environment\Microsoft.Process.Environment.winmd">
       <IsWinMDFile>true</IsWinMDFile>
     </Reference>
-    <ReferenceCopyLocalPaths Include="$(SolutionDir)BuildOutput\$(Configuration)\$(PlatformShortName)\Microsoft.Process.Environment\Microsoft.Process.Environment.dll">
+    <ReferenceCopyLocalPaths Include="$(SolutionDir)dev\EVAndPATH\$(Configuration)\$(PlatformShortName)\Microsoft.Process.Environment\Microsoft.Process.Environment.dll">
       <IsWinMDFile>false</IsWinMDFile>
     </ReferenceCopyLocalPaths>
   </ItemGroup>

@@ -1,0 +1,9 @@
+﻿namespace Microsoft.Process.Environment
+{
+    [default_interface]
+    runtimeclass EnvironmentManager
+    {
+        static EnvironmentManager GetForUser();
+        String SayHello();
+    }
+}
