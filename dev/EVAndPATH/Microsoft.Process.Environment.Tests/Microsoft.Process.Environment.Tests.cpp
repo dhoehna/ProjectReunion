@@ -1,24 +1,80 @@
-﻿// Microsoft.Process.Environment.Tests.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
-#include "pch.h"
-#include <iostream>
-#include "winrt/Microsoft.Process.Environment.h"
-int __stdcall wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int)
+﻿#include "pch.h"
+
+using namespace winrt::Microsoft::Process::Environment; // for EnvironmentManager
+using namespace winrt::Windows::Foundation::Collections; // for IMapView
+
+class EnvironmentManagerTests   {
+   // Declare this class as a TestClass, and supply metadata if necessary.
+    BEGIN_TEST_CLASS(EnvironmentManagerTests)
+        TEST_CLASS_PROPERTY(L"ActivationContext", L"Microsoft.Process.Environment.Tests.exe.manifest")
+        END_TEST_CLASS()
+
+        TEST_METHOD_SETUP(TestSetup);
+ 
+   TEST_METHOD(TestGetForProcess);
+   TEST_METHOD(TestGetForUser);
+   TEST_METHOD(TestGetForMachine);
+   TEST_METHOD(TestGetEnvironmentVariables);
+};
+
+IMapView<winrt::hstring, winrt::hstring> GetAndFormatEnvironmentVariables(LPWSTR environmentVariableString)
+{
+
+    VERIFY_IS_NOT_NULL(environmentVariableString);
+
+    LPTSTR variable;
+    variable = (LPTSTR)environmentVariableString;
+
+    StringMap environmentVariables;
+    while (*variable)
+    {
+        std::wstring environmentVariable(variable);
+        size_t locationOfNull = environmentVariable.find_last_of(L'=');
+
+        environmentVariables.Insert(environmentVariable.substr(0, locationOfNull), environmentVariable.substr(locationOfNull + 1));
+
+        variable += lstrlen(variable) + 1;
+    }
+
+    VERIFY_WIN32_BOOL_SUCCEEDED(FreeEnvironmentStrings(environmentVariableString));
+
+    return environmentVariables.GetView();
+}
+
+
+bool EnvironmentManagerTests::TestSetup()
 {
     winrt::init_apartment(winrt::apartment_type::single_threaded);
-    winrt::Microsoft::Process::Environment::EnvironmentManager environmentManager = winrt::Microsoft::Process::Environment::EnvironmentManager::GetForUser();
-    std::wstring messageToSay(environmentManager.SayHello().c_str());
-
-    MessageBoxEx(NULL, messageToSay.c_str(), L"Caption", 0, 0);
-    return 0;
+    return true;
 }
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
 
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
+void EnvironmentManagerTests::TestGetForProcess()
+{
+    EnvironmentManager environmentManager = EnvironmentManager::GetForProcess();
+    VERIFY_IS_NOT_NULL(environmentManager);
+}
+
+void EnvironmentManagerTests::TestGetForUser()
+{
+    EnvironmentManager environmentManager = EnvironmentManager::GetForUser();
+    VERIFY_IS_NOT_NULL(environmentManager);
+}
+
+
+void EnvironmentManagerTests::TestGetForMachine()
+{
+    EnvironmentManager environmentManager = EnvironmentManager::GetForMachine();
+    VERIFY_IS_NOT_NULL(environmentManager);
+}
+
+void EnvironmentManagerTests::TestGetEnvironmentVariables()
+{
+    LPWSTR environmentVariables = GetEnvironmentStrings();
+    IMapView<winrt::hstring, winrt::hstring> environmentVariablesExpected = GetAndFormatEnvironmentVariables(environmentVariables);
+
+    EnvironmentManager environmentmanager = EnvironmentManager::GetForProcess();
+    IMapView<winrt::hstring, winrt::hstring> environmentVariablesResult = environmentmanager.GetEnvironmentVariables();
+
+    MessageBoxEx(NULL, L"In here", L"In here", 0, 0);
+    VERIFY_ARE_EQUAL(environmentVariablesExpected.Size(), environmentVariablesResult.Size());
+}

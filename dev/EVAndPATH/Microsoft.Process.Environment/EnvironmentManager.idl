@@ -3,7 +3,10 @@
     [default_interface]
     runtimeclass EnvironmentManager
     {
+        static EnvironmentManager GetForProcess();
         static EnvironmentManager GetForUser();
-        String SayHello();
+        static EnvironmentManager GetForMachine();
+
+        IMapView<String, String> GetEnvironmentVariables();
     }
 }
