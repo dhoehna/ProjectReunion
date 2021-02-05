@@ -1,10 +1,11 @@
-﻿#include "pch.h"
+﻿#pragma once
+#include "pch.h"
 
 using namespace winrt::Microsoft::Process::Environment; // for EnvironmentManager
 using namespace winrt::Windows::Foundation::Collections; // for IMapView
 typedef IMapView<winrt::hstring, winrt::hstring> EnvironmentVariables;
 
-EnvironmentVariables GetAndFormatEnvironmentVariables(LPWSTR environmentVariableString)
+inline EnvironmentVariables GetAndFormatEnvironmentVariables(LPWSTR environmentVariableString)
 {
     VERIFY_IS_NOT_NULL(environmentVariableString);
 
@@ -39,7 +40,7 @@ EnvironmentVariables GetAndFormatEnvironmentVariables(LPWSTR environmentVariable
 /// This test will alwayse use <paramref name="underTest" /> to compare to <paramref name="real" />.  As long as the size, keys, and values
 /// are compared from <paramref name="underTest" /> to <paramref name="real" /> this will fail in the case that any keys are different, or any values are different
 /// </remarks>
-void CompareIMapViews(EnvironmentVariables underTest, EnvironmentVariables real)
+inline void CompareIMapViews(EnvironmentVariables underTest, EnvironmentVariables real)
 {
     // Make sure the sizes are the same.
     VERIFY_ARE_EQUAL(underTest.Size(), real.Size());
@@ -67,55 +68,4 @@ void CompareIMapViews(EnvironmentVariables underTest, EnvironmentVariables real)
         VERIFY_IS_TRUE(real.HasKey(underTestEnvironmentVariable.Key()));
         VERIFY_ARE_EQUAL(underTestEnvironmentVariable.Value(), real.Lookup(underTestEnvironmentVariable.Key()));
     }
-}
-
-class EnvironmentManagerTests   {
-   // Declare this class as a TestClass, and supply metadata if necessary.
-    BEGIN_TEST_CLASS(EnvironmentManagerTests)
-        TEST_CLASS_PROPERTY(L"ActivationContext", L"Microsoft.Process.Environment.Tests.exe.manifest")
-        END_TEST_CLASS()
-
-        TEST_METHOD_SETUP(TestSetup);
- 
-   TEST_METHOD(TestGetForProcess);
-   TEST_METHOD(TestGetForUser);
-   TEST_METHOD(TestGetForMachine);
-   TEST_METHOD(TestGetEnvironmentVariablesForProcess);
-};
-
-bool EnvironmentManagerTests::TestSetup()
-{
-    winrt::init_apartment(winrt::apartment_type::single_threaded);
-    return true;
-}
-
-void EnvironmentManagerTests::TestGetForProcess()
-{
-    EnvironmentManager environmentManager = EnvironmentManager::GetForProcess();
-    VERIFY_IS_NOT_NULL(environmentManager);
-}
-
-void EnvironmentManagerTests::TestGetForUser()
-{
-    EnvironmentManager environmentManager = EnvironmentManager::GetForUser();
-    VERIFY_IS_NOT_NULL(environmentManager);
-}
-
-
-void EnvironmentManagerTests::TestGetForMachine()
-{
-    EnvironmentManager environmentManager = EnvironmentManager::GetForMachine();
-    VERIFY_IS_NOT_NULL(environmentManager);
-}
-
-void EnvironmentManagerTests::TestGetEnvironmentVariablesForProcess()
-{
-    LPWSTR environmentVariables = GetEnvironmentStrings();
-    EnvironmentVariables environmentVariablesFromWinRTAPI = GetAndFormatEnvironmentVariables(environmentVariables);
-
-    EnvironmentManager environmentmanager = EnvironmentManager::GetForProcess();
-    EnvironmentVariables environmentVariablesFromWindowsAPI = environmentmanager.GetEnvironmentVariables();
-
-    CompareIMapViews(environmentVariablesFromWinRTAPI, environmentVariablesFromWindowsAPI);
-    
 }

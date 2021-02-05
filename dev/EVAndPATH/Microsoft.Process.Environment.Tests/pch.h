@@ -5,3 +5,8 @@
 #include "winrt/Microsoft.Process.Environment.h"
 #include <processenv.h>
 #include <sstream>
+#include <iostream>
+#include <fstream>
+
+#include <wil/cppwinrt.h>
+#include <wil/registry.h>

@@ -150,9 +150,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Helper.h" />
+    <ClInclude Include="Microsoft.Process.Environment.UWPTests.h" />
+    <ClInclude Include="Microsoft.Process.Environment.Win32Tests.h" />
     <ClInclude Include="pch.h" />
+    <ClCompile Include="Microsoft.Process.Environment.UWPTests.cpp" />
     <!--<ClInclude Include="resource.h" />-->
-    <ClCompile Include="Microsoft.Process.Environment.Tests.cpp" />
+    <ClCompile Include="Microsoft.Process.Environment.Win32Tests.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
@@ -164,6 +168,11 @@
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="PropertySheet.props" />
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="AppxManifest.pkg.xml">
+      <DeploymentContent>true</DeploymentContent>
+    </Xml>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
