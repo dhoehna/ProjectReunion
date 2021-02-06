@@ -150,10 +150,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="EnvironmentManagerCentennialTests.h" />
     <ClInclude Include="Helper.h" />
     <ClInclude Include="Microsoft.Process.Environment.UWPTests.h" />
     <ClInclude Include="Microsoft.Process.Environment.Win32Tests.h" />
     <ClInclude Include="pch.h" />
+    <ClCompile Include="EnvironmentManagerCentennialTests.cpp" />
     <ClCompile Include="Microsoft.Process.Environment.UWPTests.cpp" />
     <!--<ClInclude Include="resource.h" />-->
     <ClCompile Include="Microsoft.Process.Environment.Win32Tests.cpp" />
@@ -171,6 +173,9 @@
   </ItemGroup>
   <ItemGroup>
     <Xml Include="AppxManifest.pkg.xml">
+      <DeploymentContent>true</DeploymentContent>
+    </Xml>
+    <Xml Include="CentennialAppxManifest.pkg.xml">
       <DeploymentContent>true</DeploymentContent>
     </Xml>
   </ItemGroup>

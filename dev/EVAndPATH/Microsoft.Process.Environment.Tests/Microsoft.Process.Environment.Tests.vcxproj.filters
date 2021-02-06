@@ -24,6 +24,9 @@
     <ClCompile Include="Microsoft.Process.Environment.UWPTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="EnvironmentManagerCentennialTests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Propertysheet.props" />
@@ -45,9 +48,15 @@
     <ClInclude Include="Microsoft.Process.Environment.Win32Tests.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="EnvironmentManagerCentennialTests.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="AppxManifest.pkg.xml">
+      <Filter>Source Files</Filter>
+    </Xml>
+    <Xml Include="CentennialAppxManifest.pkg.xml">
       <Filter>Source Files</Filter>
     </Xml>
   </ItemGroup>
