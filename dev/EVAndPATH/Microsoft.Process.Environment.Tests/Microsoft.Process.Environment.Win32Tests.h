@@ -9,9 +9,10 @@ class EnvironmentManagerWin32Tests {
 
     TEST_METHOD_SETUP(TestSetup);
 
-    //TEST_METHOD(TestGetForProcess);
-    //TEST_METHOD(TestGetForUser);
-    //TEST_METHOD(TestGetForMachine);
-    //TEST_METHOD(TestGetEnvironmentVariablesForProcess);
+    TEST_METHOD(TestGetForProcess);
+    TEST_METHOD(TestGetForUser);
+    TEST_METHOD(TestGetForMachine);
+    TEST_METHOD(TestGetEnvironmentVariablesForProcess);
     TEST_METHOD(TestGetEnvironmentVariablesForUser);
+    TEST_METHOD(TestGetEnvironmentVariablesForMachine);
 };

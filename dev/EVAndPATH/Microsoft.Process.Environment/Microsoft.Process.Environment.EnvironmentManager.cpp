@@ -37,87 +37,17 @@ namespace winrt::Microsoft::Process::Environment::implementation
 
         if (m_Scope == Scope::Process)
         {
-            environmentVariables = GetAndFormatEnvironmentVariables();
+            environmentVariables = GetProcessEnvironmentVariables();
         }
-        else if (m_Scope == Scope::User)
+        else
         {
-            // While this way of calculating the max size of the names,
-            // values, and total number of entries includes two calls
-            // to the registry, I believe this is superior to
-            // using a do/while or a while with a prime
-            // because there is no chance of the loop iterating more than
-            // in needed AND the memory footprint is smaller.
-            wil::unique_hkey environmentVariablesHKey;
-            THROW_IF_FAILED(HRESULT_FROM_WIN32(RegOpenKeyEx(HKEY_CURRENT_USER, L"Environment", 0, KEY_READ, environmentVariablesHKey.addressof())));
-
-            DWORD sizeOfLongestNameInCharacters;
-            DWORD sizeOfLongestValueInCharacters;
-            DWORD numberOfValues;
-
-            THROW_IF_FAILED(RegQueryInfoKeyW(
-                environmentVariablesHKey.get()
-                , nullptr // lpClass
-                , nullptr // lpcchClass
-                , nullptr // lpReserved
-                , nullptr // lpcSubKeys
-                , nullptr // lpcbMaxSubKeyLen
-                , nullptr // lpcbMaxCLassLen
-                , &numberOfValues //lpcValues
-                , &sizeOfLongestNameInCharacters
-                , &sizeOfLongestValueInCharacters
-                , nullptr // lpcmSecurityDescriptor
-                , nullptr)); // lpftLastWriteTime
-
-            // +1 for null character
-            const DWORD NAME_LENGTH = sizeOfLongestNameInCharacters + 1;
-            const DWORD VALUE_SIZE_IN_BYTES = sizeOfLongestValueInCharacters * sizeof(WCHAR);
-
-            std::unique_ptr<wchar_t[]> environmentVariableName(new wchar_t[NAME_LENGTH]);
-            std::unique_ptr<BYTE[]> environmentVariableValue(new BYTE[VALUE_SIZE_IN_BYTES]);
-
-            for (int valueIndex = 0; valueIndex < numberOfValues; valueIndex++)
-            {
-                DWORD nameLength = NAME_LENGTH;
-                DWORD valueSize = VALUE_SIZE_IN_BYTES;
-                LSTATUS enumerationStatus = RegEnumValueW(environmentVariablesHKey.get()
-                    , valueIndex
-                    , environmentVariableName.get()
-                    , &nameLength
-                    , nullptr
-                    , nullptr
-                    , environmentVariableValue.get()
-                    , &valueSize);
-
-                // An empty name indicates the default value.
-                if (nameLength == 0)
-                {
-                    continue;
-                }
-
-                // If there was an error getting the value
-                if (enumerationStatus != ERROR_SUCCESS && enumerationStatus != ERROR_NO_MORE_ITEMS)
-                {
-                    THROW_HR(HRESULT_FROM_WIN32(enumerationStatus));
-                }
-
-                environmentVariables.Insert(environmentVariableName.get(), reinterpret_cast<LPWSTR>(environmentVariableValue.get()));
-
-                environmentVariableName.reset(new wchar_t[NAME_LENGTH]);
-                environmentVariableValue.reset(new BYTE[VALUE_SIZE_IN_BYTES]);
-            }
-
-        }
-        else //Scope is machine
-        {
-            //HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Environment
-
-
+            environmentVariables = GetUserOrMachineEnvironmentVariables();
         }
 
         return environmentVariables.GetView();
     }
 
-    StringMap EnvironmentManager::GetAndFormatEnvironmentVariables()
+    StringMap EnvironmentManager::GetProcessEnvironmentVariables()
     {
         //Get the pointer to the process block
         LPWSTR environmentVariablesString = GetEnvironmentStrings();
@@ -139,6 +69,92 @@ namespace winrt::Microsoft::Process::Environment::implementation
         }
 
         THROW_IF_WIN32_BOOL_FALSE(FreeEnvironmentStrings(environmentVariablesString));
+
+        return environmentVariables;
+    }
+
+    /// <summary>
+    /// Uses the stores m_Scope to figure out wheather to get the environment
+    /// variables for the user, or for the machine.
+    /// </summary>
+    /// <returns></returns>
+    StringMap EnvironmentManager::GetUserOrMachineEnvironmentVariables()
+    {
+        StringMap environmentVariables;
+        wil::unique_hkey environmentVariablesHKey;
+
+        if (m_Scope == Scope::User)
+        {
+            THROW_IF_FAILED(HRESULT_FROM_WIN32(RegOpenKeyEx(HKEY_CURRENT_USER, L"Environment", 0, KEY_READ, environmentVariablesHKey.addressof())));
+        }
+        else //Scope is Machine
+        {
+            THROW_IF_FAILED(HRESULT_FROM_WIN32(RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment", 0, KEY_READ, environmentVariablesHKey.addressof())));
+        }
+
+        // While this way of calculating the max size of the names,
+        // values, and total number of entries includes two calls
+        // to the registry, I believe this is superior to
+        // using a do/while or a while with a prime
+        // because there is no chance of the loop iterating more than
+        // is needed AND the size of the name and value arrays are
+        // only as big as the bigges name or value.
+
+        DWORD sizeOfLongestNameInCharacters;
+        DWORD sizeOfLongestValueInCharacters;
+        DWORD numberOfValues;
+
+        THROW_IF_FAILED(RegQueryInfoKeyW(
+            environmentVariablesHKey.get()
+            , nullptr // lpClass
+            , nullptr // lpcchClass
+            , nullptr // lpReserved
+            , nullptr // lpcSubKeys
+            , nullptr // lpcbMaxSubKeyLen
+            , nullptr // lpcbMaxCLassLen
+            , &numberOfValues //lpcValues
+            , &sizeOfLongestNameInCharacters
+            , &sizeOfLongestValueInCharacters
+            , nullptr // lpcmSecurityDescriptor
+            , nullptr)); // lpftLastWriteTime
+
+        // +1 for null character
+        const DWORD NAME_LENGTH = sizeOfLongestNameInCharacters + 1;
+        const DWORD VALUE_SIZE_IN_BYTES = sizeOfLongestValueInCharacters * sizeof(WCHAR);
+
+        std::unique_ptr<wchar_t[]> environmentVariableName(new wchar_t[NAME_LENGTH]);
+        std::unique_ptr<BYTE[]> environmentVariableValue(new BYTE[VALUE_SIZE_IN_BYTES]);
+
+        for (int valueIndex = 0; valueIndex < numberOfValues; valueIndex++)
+        {
+            DWORD nameLength = NAME_LENGTH;
+            DWORD valueSize = VALUE_SIZE_IN_BYTES;
+            LSTATUS enumerationStatus = RegEnumValueW(environmentVariablesHKey.get()
+                , valueIndex
+                , environmentVariableName.get()
+                , &nameLength
+                , nullptr
+                , nullptr
+                , environmentVariableValue.get()
+                , &valueSize);
+
+            // An empty name indicates the default value.
+            if (nameLength == 0)
+            {
+                continue;
+            }
+
+            // If there was an error getting the value
+            if (enumerationStatus != ERROR_SUCCESS && enumerationStatus != ERROR_NO_MORE_ITEMS)
+            {
+                THROW_HR(HRESULT_FROM_WIN32(enumerationStatus));
+            }
+
+            environmentVariables.Insert(environmentVariableName.get(), reinterpret_cast<LPWSTR>(environmentVariableValue.get()));
+
+            environmentVariableName.reset(new wchar_t[NAME_LENGTH]);
+            environmentVariableValue.reset(new BYTE[VALUE_SIZE_IN_BYTES]);
+        }
 
         return environmentVariables;
     }

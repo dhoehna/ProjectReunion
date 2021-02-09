@@ -25,7 +25,8 @@ namespace winrt::Microsoft::Process::Environment::implementation
     private:
         Scope m_Scope;
 
-        StringMap GetAndFormatEnvironmentVariables();
+        StringMap GetProcessEnvironmentVariables();
+        StringMap GetUserOrMachineEnvironmentVariables();
     };
 }
 namespace winrt::Microsoft::Process::Environment::factory_implementation
