@@ -3,3 +3,4 @@
 
 #include <wil/cppwinrt.h>
 #include <wil/result.h>
+#include <wil/registry.h>

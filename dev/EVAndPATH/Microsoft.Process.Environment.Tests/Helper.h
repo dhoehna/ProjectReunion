@@ -50,22 +50,31 @@ inline void CompareIMapViews(EnvironmentVariables underTest, EnvironmentVariable
         return;
     }
 
-    // loop-and-a-half problem.
-    // We need to loop through every item, but we need to do the test on the
-    // first item outside of the loop in order to prime the loop.
+    //MessageBoxEx(NULL, L"In here", L"In here", 0, 0);
     auto underTestIterator = underTest.First();
-    auto underTestEnvironmentVariable = underTestIterator.Current();
-    auto value = underTestEnvironmentVariable.Value();
-
-    VERIFY_IS_TRUE(real.HasKey(underTestEnvironmentVariable.Key()));
-    VERIFY_ARE_EQUAL(underTestEnvironmentVariable.Value(), real.Lookup(underTestEnvironmentVariable.Key()));
-
-    while (underTestIterator.MoveNext())
+    do
     {
-        underTestEnvironmentVariable = underTestIterator.Current();
-        value = underTestEnvironmentVariable.Value();
+        // Make sure the same key exists in both collections
+        auto keyFromTest = underTestIterator.Current().Key();
 
-        VERIFY_IS_TRUE(real.HasKey(underTestEnvironmentVariable.Key()));
-        VERIFY_ARE_EQUAL(underTestEnvironmentVariable.Value(), real.Lookup(underTestEnvironmentVariable.Key()));
-    }
+        std::wstringstream logMessage;
+        logMessage << L"Key that is being tested: ";
+        logMessage << keyFromTest.c_str();
+
+        WEX::Logging::Log::Comment(logMessage.str().c_str());
+        
+        VERIFY_IS_TRUE(real.HasKey(keyFromTest));
+
+        // Make sure they have the same value
+        auto valueFromTest = underTestIterator.Current().Value();
+
+        std::wstringstream valueMessage;
+        valueMessage << L"Value from test: ";
+        valueMessage << valueFromTest.c_str() << L"\r\n";
+        valueMessage << L"Value from real: " << real.Lookup(keyFromTest).c_str();
+
+        WEX::Logging::Log::Comment(valueMessage.str().c_str());
+        VERIFY_ARE_EQUAL(valueFromTest, real.Lookup(keyFromTest));
+        underTestIterator.MoveNext();
+    } while (underTestIterator.HasCurrent());
 }
