@@ -5,6 +5,13 @@ using namespace winrt::Microsoft::Process::Environment; // for EnvironmentManage
 using namespace winrt::Windows::Foundation::Collections; // for IMapView
 typedef IMapView<winrt::hstring, winrt::hstring> EnvironmentVariables;
 
+inline const wchar_t* USER_EV_REG_LOCATION = L"Environment";
+inline const wchar_t* MACHINE_EV_REG_LOCATION = L"SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment";
+
+inline const wchar_t* EV_KEY_NAME = L"Hello";
+inline const wchar_t* EV_VALUE_NAME = L"YOLO";
+inline const DWORD EV_VALUE_NAME_LENGTH_WITH_NULL = 5;
+
 inline EnvironmentVariables GetEnvironmentVariablesFromRegistry(HKEY hKey)
 {
     StringMap environmentVariables;
@@ -69,17 +76,58 @@ inline EnvironmentVariables GetEnvironmentVariablesFromRegistry(HKEY hKey)
     return environmentVariables.GetView();
 }
 
+inline void WriteUserEV()
+{
+    wil::unique_hkey userEnvironmentVariablesHKey;
+    VERIFY_WIN32_SUCCEEDED(RegOpenKeyEx(HKEY_CURRENT_USER, USER_EV_REG_LOCATION, 0, KEY_WRITE, userEnvironmentVariablesHKey.addressof()));
+    VERIFY_WIN32_SUCCEEDED(RegSetValueExW(userEnvironmentVariablesHKey.get(), EV_KEY_NAME, 0, REG_SZ, (LPBYTE)EV_VALUE_NAME, EV_VALUE_NAME_LENGTH_WITH_NULL * sizeof(wchar_t)));
+}
+
+inline void RemoveUserEV()
+{
+    wil::unique_hkey userEnvironmentVariablesHKey;
+    VERIFY_WIN32_SUCCEEDED(RegOpenKeyEx(HKEY_CURRENT_USER, USER_EV_REG_LOCATION, 0, KEY_WRITE, userEnvironmentVariablesHKey.addressof()));
+    VERIFY_WIN32_SUCCEEDED(RegDeleteValueW(userEnvironmentVariablesHKey.get(), EV_KEY_NAME));
+}
+
+inline void WriteMachineEV()
+{
+    wil::unique_hkey machineEnvironmentVariablesHKey;
+    VERIFY_WIN32_SUCCEEDED(RegOpenKeyEx(HKEY_LOCAL_MACHINE, MACHINE_EV_REG_LOCATION, 0, KEY_WRITE, machineEnvironmentVariablesHKey.addressof()));
+    VERIFY_WIN32_SUCCEEDED(RegSetValueEx(machineEnvironmentVariablesHKey.get(), EV_KEY_NAME, 0, REG_SZ, (LPBYTE)EV_VALUE_NAME, EV_VALUE_NAME_LENGTH_WITH_NULL * sizeof(wchar_t)));
+}
+
+inline void RemoveMachineEV()
+{
+    wil::unique_hkey machineEnvironmentVariablesHKey;
+    VERIFY_WIN32_SUCCEEDED(RegOpenKeyEx(HKEY_LOCAL_MACHINE, MACHINE_EV_REG_LOCATION, 0, KEY_WRITE, machineEnvironmentVariablesHKey.addressof()));
+    VERIFY_WIN32_SUCCEEDED(RegDeleteValueW(machineEnvironmentVariablesHKey.get(), EV_KEY_NAME));
+}
+
+
+inline void WriteUserAndMachineEV()
+{
+    WriteUserEV();
+    WriteMachineEV();
+}
+
+inline void RemoveUserAndMachineEV()
+{
+    RemoveUserEV();
+    RemoveMachineEV();
+}
+
 inline EnvironmentVariables GetEnvironmentVariablesForUser()
 {
     wil::unique_hkey environmentVariablesHKey;
-    THROW_IF_FAILED(HRESULT_FROM_WIN32(RegOpenKeyEx(HKEY_CURRENT_USER, L"Environment", 0, KEY_READ, environmentVariablesHKey.addressof())));
+    THROW_IF_FAILED(HRESULT_FROM_WIN32(RegOpenKeyEx(HKEY_CURRENT_USER, USER_EV_REG_LOCATION, 0, KEY_READ, environmentVariablesHKey.addressof())));
     return GetEnvironmentVariablesFromRegistry(environmentVariablesHKey.get());
 }
 
 inline EnvironmentVariables GetEnvironmentVariablesForMachine()
 {
     wil::unique_hkey environmentVariablesHKey;
-    THROW_IF_FAILED(HRESULT_FROM_WIN32(RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment", 0, KEY_READ, environmentVariablesHKey.addressof())));
+    THROW_IF_FAILED(HRESULT_FROM_WIN32(RegOpenKeyEx(HKEY_LOCAL_MACHINE, MACHINE_EV_REG_LOCATION, 0, KEY_READ, environmentVariablesHKey.addressof())));
     return GetEnvironmentVariablesFromRegistry(environmentVariablesHKey.get());
 }
 

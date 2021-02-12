@@ -24,7 +24,16 @@
     <ClCompile Include="Microsoft.Process.Environment.UWPTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="EnvironmentManagerCentennialTests.cpp">
+    <ClCompile Include="Microsoft.Process.Environment.ElevatedWin32Tests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Microsoft.Process.Environment.ElevatedUWPTests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Microsoft.Process.Environment.ElevatedCentennialTests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Microsoft.Process.Environment.CentennialTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -48,7 +57,16 @@
     <ClInclude Include="Microsoft.Process.Environment.Win32Tests.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="EnvironmentManagerCentennialTests.h">
+    <ClInclude Include="Microsoft.Process.Environment.ElevatedWin32Tests.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Microsoft.Process.Environment.ElevatedUWPTests.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Microsoft.Process.Environment.ElevatedCentennialTests.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Microsoft.Process.Environment.CentennialTests.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

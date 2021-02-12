@@ -15,4 +15,5 @@ class EnvironmentManagerUWPTests {
     TEST_METHOD(UWPTestGetEnvironmentVariablesForProcess);
     TEST_METHOD(UWPTestGetEnvironmentVariablesForUser);
     TEST_METHOD(UWPTestGetEnvironmentVariablesForMachine);
+    TEST_METHOD(UWPTestGetEnvironmentVariableForProcess);
 };

@@ -21,12 +21,17 @@ namespace winrt::Microsoft::Process::Environment::implementation
         static Environment::EnvironmentManager GetForMachine();
 
         IMapView<hstring, hstring> GetEnvironmentVariables();
+        hstring GetEnvironmentVariable(hstring variableName);
 
     private:
         Scope m_Scope;
 
+        const LPWSTR USER_EV_REG_LOCATION = L"Environment";
+        const LPWSTR MACHINE_EV_REG_LOCATION = L"SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment";
+
         StringMap GetProcessEnvironmentVariables();
         StringMap GetUserOrMachineEnvironmentVariables();
+        wil::unique_hkey GetRegHKeyForEVUserAndMachineScope(bool needsWriteAccess = false);
     };
 }
 namespace winrt::Microsoft::Process::Environment::factory_implementation

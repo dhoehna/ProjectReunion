@@ -53,3 +53,12 @@ void EnvironmentManagerUWPTests::UWPTestGetEnvironmentVariablesForMachine()
     CompareIMapViews(environmentVariablesFromWinRTAPI, environmentVariablesFromWindowsAPI);
 
 }
+
+void EnvironmentManagerUWPTests::UWPTestGetEnvironmentVariableForProcess()
+{
+    SetEnvironmentVariable(EV_KEY_NAME, EV_VALUE_NAME);
+
+    EnvironmentManager forProcess = EnvironmentManager::GetForProcess();
+    winrt::hstring environmentValue = forProcess.GetEnvironmentVariable(EV_KEY_NAME);
+    VERIFY_ARE_EQUAL(std::wstring(EV_VALUE_NAME), environmentValue);
+}

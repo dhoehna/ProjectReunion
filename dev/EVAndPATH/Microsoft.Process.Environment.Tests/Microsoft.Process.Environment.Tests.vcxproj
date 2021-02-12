@@ -150,12 +150,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="EnvironmentManagerCentennialTests.h" />
+    <ClInclude Include="Microsoft.Process.Environment.CentennialTests.h" />
+    <ClInclude Include="Microsoft.Process.Environment.ElevatedCentennialTests.h" />
     <ClInclude Include="Helper.h" />
+    <ClInclude Include="Microsoft.Process.Environment.ElevatedUWPTests.h" />
+    <ClInclude Include="Microsoft.Process.Environment.ElevatedWin32Tests.h" />
     <ClInclude Include="Microsoft.Process.Environment.UWPTests.h" />
     <ClInclude Include="Microsoft.Process.Environment.Win32Tests.h" />
     <ClInclude Include="pch.h" />
-    <ClCompile Include="EnvironmentManagerCentennialTests.cpp" />
+    <ClCompile Include="Microsoft.Process.Environment.ElevatedCentennialTests.cpp" />
+    <ClCompile Include="Microsoft.Process.Environment.CentennialTests.cpp" />
+    <ClCompile Include="Microsoft.Process.Environment.ElevatedUWPTests.cpp" />
+    <ClCompile Include="Microsoft.Process.Environment.ElevatedWin32Tests.cpp" />
     <ClCompile Include="Microsoft.Process.Environment.UWPTests.cpp" />
     <!--<ClInclude Include="resource.h" />-->
     <ClCompile Include="Microsoft.Process.Environment.Win32Tests.cpp" />

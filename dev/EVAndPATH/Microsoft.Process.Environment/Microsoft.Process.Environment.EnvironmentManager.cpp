@@ -47,6 +47,73 @@ namespace winrt::Microsoft::Process::Environment::implementation
         return environmentVariables.GetView();
     }
 
+    hstring EnvironmentManager::GetEnvironmentVariable(hstring variableName)
+    {
+        if (variableName.empty())
+        {
+            THROW_HR(E_INVALIDARG);
+        }
+
+        if (m_Scope == Scope::Process)
+        {
+            // Get the size of the buffer.
+            DWORD sizeNeededInCharacters = ::GetEnvironmentVariable(variableName.c_str(), nullptr, 0);
+
+            // If we got an error
+            if (sizeNeededInCharacters == 0)
+            {
+                DWORD lastError = GetLastError();
+
+                if (lastError == ERROR_ENVVAR_NOT_FOUND)
+                {
+                    return L"";
+                }
+                else
+                {
+                    THROW_HR(HRESULT_FROM_WIN32(lastError));
+                }
+            }
+
+            std::wstring environmentVariableValue;
+
+            // Remove the trailing \0 because this will go into an hstring.
+            environmentVariableValue.resize(sizeNeededInCharacters - 1);
+            DWORD getResult = ::GetEnvironmentVariable(variableName.c_str(), &environmentVariableValue[0], sizeNeededInCharacters);
+
+            if (getResult == 0)
+            {
+                THROW_HR(HRESULT_FROM_WIN32(GetLastError()));
+            }
+
+            return hstring(environmentVariableValue);
+        }
+        else
+        {
+            wil::unique_hkey environmentVariableHKey = GetRegHKeyForEVUserAndMachineScope();
+
+            DWORD sizeOfEnvironmentValue;
+
+            // See how big we need the buffer to be
+            LSTATUS queryResult = RegQueryValueEx(environmentVariableHKey.get(), variableName.c_str(), 0, nullptr, nullptr, &sizeOfEnvironmentValue);
+
+            if (queryResult != ERROR_SUCCESS)
+            {
+                if (queryResult == ERROR_FILE_NOT_FOUND)
+                {
+                    return L"";
+                }
+
+                THROW_HR(HRESULT_FROM_WIN32((queryResult)));
+            }
+
+
+            wchar_t* environmentValue = new wchar_t[sizeOfEnvironmentValue];
+            THROW_IF_FAILED(HRESULT_FROM_WIN32((RegQueryValueEx(environmentVariableHKey.get(), variableName.c_str(), 0, nullptr, (LPBYTE)environmentValue, &sizeOfEnvironmentValue))));
+
+            return hstring(environmentValue);
+        }
+    }
+
     StringMap EnvironmentManager::GetProcessEnvironmentVariables()
     {
         //Get the pointer to the process block
@@ -81,16 +148,7 @@ namespace winrt::Microsoft::Process::Environment::implementation
     StringMap EnvironmentManager::GetUserOrMachineEnvironmentVariables()
     {
         StringMap environmentVariables;
-        wil::unique_hkey environmentVariablesHKey;
-
-        if (m_Scope == Scope::User)
-        {
-            THROW_IF_FAILED(HRESULT_FROM_WIN32(RegOpenKeyEx(HKEY_CURRENT_USER, L"Environment", 0, KEY_READ, environmentVariablesHKey.addressof())));
-        }
-        else //Scope is Machine
-        {
-            THROW_IF_FAILED(HRESULT_FROM_WIN32(RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment", 0, KEY_READ, environmentVariablesHKey.addressof())));
-        }
+        wil::unique_hkey environmentVariablesHKey = GetRegHKeyForEVUserAndMachineScope();
 
         // While this way of calculating the max size of the names,
         // values, and total number of entries includes two calls
@@ -157,5 +215,28 @@ namespace winrt::Microsoft::Process::Environment::implementation
         }
 
         return environmentVariables;
+    }
+
+    wil::unique_hkey EnvironmentManager::GetRegHKeyForEVUserAndMachineScope(bool needsWriteAccess)
+    {
+        assert(m_Scope != Scope::Process);
+        REGSAM registrySecurity = KEY_READ;
+
+        if (needsWriteAccess)
+        {
+            registrySecurity &= KEY_SET_VALUE;
+        }
+
+        wil::unique_hkey environmentVariablesHKey;
+        if (m_Scope == Scope::User)
+        {
+            THROW_IF_FAILED(HRESULT_FROM_WIN32(RegOpenKeyEx(HKEY_CURRENT_USER, USER_EV_REG_LOCATION, 0, KEY_READ, environmentVariablesHKey.addressof())));
+        }
+        else //Scope is Machine
+        {
+            THROW_IF_FAILED(HRESULT_FROM_WIN32(RegOpenKeyEx(HKEY_LOCAL_MACHINE, MACHINE_EV_REG_LOCATION, 0, KEY_READ, environmentVariablesHKey.addressof())));
+        }
+
+        return environmentVariablesHKey;
     }
 }

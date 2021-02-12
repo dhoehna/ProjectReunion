@@ -7,6 +7,21 @@ bool EnvironmentManagerWin32Tests::TestSetup()
     return true;
 }
 
+bool EnvironmentManagerWin32Tests::WriteWin32UserUV()
+{
+    WriteUserEV();
+
+    return true;
+}
+
+bool EnvironmentManagerWin32Tests::RemoveWin32UserUV()
+{
+    RemoveUserEV();
+
+    return true;
+}
+
+
 void EnvironmentManagerWin32Tests::TestGetForProcess()
 {
     EnvironmentManager environmentManager = EnvironmentManager::GetForProcess();
@@ -59,4 +74,20 @@ void EnvironmentManagerWin32Tests::TestGetEnvironmentVariablesForMachine()
 
     CompareIMapViews(environmentVariablesFromWinRTAPI, environmentVariablesFromWindowsAPI);
 
+}
+
+void EnvironmentManagerWin32Tests::TestGetEnvironmentVariableForProcess()
+{
+    SetEnvironmentVariable(L"Hello", L"YOLO");
+
+    EnvironmentManager forProcess = EnvironmentManager::GetForProcess();
+    winrt::hstring environmentValue = forProcess.GetEnvironmentVariable(L"Hello");
+    VERIFY_ARE_EQUAL(std::wstring(L"YOLO"), environmentValue);
+}
+
+void EnvironmentManagerWin32Tests::TestGetEnvironmentVariableForUser()
+{
+    EnvironmentManager forProcess = EnvironmentManager::GetForUser();
+    winrt::hstring environmentValue = forProcess.GetEnvironmentVariable(EV_KEY_NAME);
+    VERIFY_ARE_EQUAL(std::wstring(EV_VALUE_NAME), environmentValue);
 }

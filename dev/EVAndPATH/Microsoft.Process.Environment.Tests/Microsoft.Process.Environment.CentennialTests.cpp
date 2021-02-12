@@ -1,9 +1,21 @@
 ﻿#include "pch.h"
-#include "EnvironmentManagerCentennialTests.h"
+#include "Microsoft.Process.Environment.CentennialTests.h"
 
 bool EnvironmentManagerCentennialTests::TestSetup()
 {
     winrt::init_apartment(winrt::apartment_type::single_threaded);
+    return true;
+}
+
+bool EnvironmentManagerCentennialTests::CentennialTestSetup()
+{
+    WriteUserEV();
+    return true;
+}
+
+bool EnvironmentManagerCentennialTests::CentennialTestCleanup()
+{
+    RemoveUserEV();
     return true;
 }
 
@@ -40,10 +52,11 @@ void EnvironmentManagerCentennialTests::CentennialTestGetEnvironmentVariablesFor
 
 void EnvironmentManagerCentennialTests::CentennialTestGetEnvironmentVariablesForUser()
 {
-    EnvironmentVariables environmentVariablesFromWindowsAPI = GetEnvironmentVariablesForUser();
 
     EnvironmentManager environmentmanager = EnvironmentManager::GetForUser();
     EnvironmentVariables environmentVariablesFromWinRTAPI = environmentmanager.GetEnvironmentVariables();
+
+    EnvironmentVariables environmentVariablesFromWindowsAPI = GetEnvironmentVariablesForUser();
 
     CompareIMapViews(environmentVariablesFromWinRTAPI, environmentVariablesFromWindowsAPI);
 
@@ -58,4 +71,20 @@ void EnvironmentManagerCentennialTests::CentennialTestGetEnvironmentVariablesFor
 
     CompareIMapViews(environmentVariablesFromWinRTAPI, environmentVariablesFromWindowsAPI);
 
+}
+
+void EnvironmentManagerCentennialTests::CentennialTestGetEnvironmentVariableForProcess()
+{
+    SetEnvironmentVariable(L"Hello", L"YOLO");
+
+    EnvironmentManager forProcess = EnvironmentManager::GetForProcess();
+    winrt::hstring environmentValue = forProcess.GetEnvironmentVariable(EV_KEY_NAME);
+    VERIFY_ARE_EQUAL(std::wstring(EV_VALUE_NAME), environmentValue);
+}
+
+void EnvironmentManagerCentennialTests::CentennialTestGetEnvironmentVariableForUser()
+{
+    EnvironmentManager forProcess = EnvironmentManager::GetForUser();
+    winrt::hstring environmentValue = forProcess.GetEnvironmentVariable(EV_KEY_NAME);
+    VERIFY_ARE_EQUAL(std::wstring(EV_VALUE_NAME), environmentValue);
 }
