@@ -42,6 +42,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Microsoft.Process.Environme
 		{6CFF81C2-E019-4924-B1F2-F39116A7B5B7} = {6CFF81C2-E019-4924-B1F2-F39116A7B5B7}
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ChangeTracker", "ChangeTracker", "{D348BCFA-733B-49F7-9878-1C8E153955EB}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ChangeTracker", "dev\ChangeTracker\ChangeTracker.vcxitems", "{EFA0AAD6-FB32-4CC1-A6D2-C42882D1CF9E}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		test\CppShared\CppShared.vcxitems*{682ded8c-3a27-48cd-866d-e853ea2024de}*SharedItemsImports = 9
@@ -51,6 +55,7 @@ Global
 		test\CppShared\CppShared.vcxitems*{c62688a1-16a0-4729-b6ed-842f4faa29f3}*SharedItemsImports = 4
 		test\inc\inc.vcxitems*{c62688a1-16a0-4729-b6ed-842f4faa29f3}*SharedItemsImports = 4
 		dev\AppLifecycle\AppLifecycle.vcxitems*{e3a522a3-6635-4a42-bded-1af46a15f63c}*SharedItemsImports = 9
+		dev\ChangeTracker\ChangeTracker.vcxitems*{efa0aad6-fb32-4cc1-a6d2-c42882d1cf9e}*SharedItemsImports = 9
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug_test|Any CPU = Debug_test|Any CPU
@@ -217,6 +222,8 @@ Global
 		{C450A18C-4329-4A69-8260-ED2E99682564} = {448ED2E5-0B37-4D97-9E6B-8C10A507976A}
 		{6CFF81C2-E019-4924-B1F2-F39116A7B5B7} = {C450A18C-4329-4A69-8260-ED2E99682564}
 		{7BD7F241-B6C4-4C70-A23D-5F8C970A5D8D} = {C450A18C-4329-4A69-8260-ED2E99682564}
+		{D348BCFA-733B-49F7-9878-1C8E153955EB} = {448ED2E5-0B37-4D97-9E6B-8C10A507976A}
+		{EFA0AAD6-FB32-4CC1-A6D2-C42882D1CF9E} = {D348BCFA-733B-49F7-9878-1C8E153955EB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4B3D7591-CFEC-4762-9A07-ABE99938FB77}
