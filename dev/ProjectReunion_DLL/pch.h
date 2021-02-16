@@ -5,6 +5,7 @@
 #include <mutex>
 #include <list>
 #include <stdexcept>
+#include <windows.h>
 #include <wil/cppwinrt.h>
 #include <wil/token_helpers.h>
 #include <wil/resource.h>

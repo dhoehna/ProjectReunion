@@ -6,6 +6,6 @@ namespace winrt::Microsoft::ProjectReunion::implementation
 {
     winrt::hstring EnvironmentVariableChangeTracker::NameOfItemToTrack()
     {
-        throw hresult_not_implemented();
+        return winrt::hstring(L"Environment");
     }
 }
