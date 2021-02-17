@@ -7,12 +7,11 @@ namespace winrt::Microsoft::ProjectReunion::implementation
 {
     struct EnvironmentManager : EnvironmentManagerT<EnvironmentManager>
     {
-
         enum Scope
         {
-            Process,
-            User,
-            Machine
+            Process = 0,
+            User = 1,
+            Machine = 2
         };
 
         EnvironmentManager(Scope const& scope);

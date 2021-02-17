@@ -50,6 +50,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Microsoft.Process.Environme
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Microsoft.Process.Environment", "dev\Microsoft.Process.Environment\Microsoft.Process.Environment.vcxitems", "{559660C0-2F37-4855-B428-2F2B72875440}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Microsoft.Process.Environment.Tests", "test\Microsoft.Process.Environment.Tests\Microsoft.Process.Environment.Tests.vcxitems", "{F2B6E016-DDA5-478E-9354-45C10B541450}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		dev\Microsoft.Process.Environment\Microsoft.Process.Environment.vcxitems*{559660c0-2f37-4855-b428-2f2b72875440}*SharedItemsImports = 9
@@ -61,6 +63,7 @@ Global
 		test\inc\inc.vcxitems*{c62688a1-16a0-4729-b6ed-842f4faa29f3}*SharedItemsImports = 4
 		dev\AppLifecycle\AppLifecycle.vcxitems*{e3a522a3-6635-4a42-bded-1af46a15f63c}*SharedItemsImports = 9
 		dev\ChangeTracker\ChangeTracker.vcxitems*{efa0aad6-fb32-4cc1-a6d2-c42882d1cf9e}*SharedItemsImports = 9
+		test\Microsoft.Process.Environment.Tests\Microsoft.Process.Environment.Tests.vcxitems*{f2b6e016-dda5-478e-9354-45c10b541450}*SharedItemsImports = 9
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug_test|Any CPU = Debug_test|Any CPU
@@ -231,6 +234,7 @@ Global
 		{EFA0AAD6-FB32-4CC1-A6D2-C42882D1CF9E} = {D348BCFA-733B-49F7-9878-1C8E153955EB}
 		{3C235E67-EB64-4098-ADCA-725CE5D7C3F0} = {448ED2E5-0B37-4D97-9E6B-8C10A507976A}
 		{559660C0-2F37-4855-B428-2F2B72875440} = {3C235E67-EB64-4098-ADCA-725CE5D7C3F0}
+		{F2B6E016-DDA5-478E-9354-45C10B541450} = {8630F7AA-2969-4DC9-8700-9B468C1DC21D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4B3D7591-CFEC-4762-9A07-ABE99938FB77}

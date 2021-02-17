@@ -3,7 +3,7 @@
   <PropertyGroup Label="Globals">
     <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
     <HasSharedItems>true</HasSharedItems>
-    <ItemsProjectGuid>{efa0aad6-fb32-4cc1-a6d2-c42882d1cf9e}</ItemsProjectGuid>
+    <ItemsProjectGuid>{f2b6e016-dda5-478e-9354-45c10b541450}</ItemsProjectGuid>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
@@ -14,10 +14,16 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="$(MSBuildThisFileDirectory)EnvironmentVariableChangeTracker.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)IChangeTracker.h" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)EnvironmentManagerWin32Tests.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="$(MSBuildThisFileDirectory)EnvironmentVariableChangeTracker.cpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)EnvironmentManagerWin32Tests.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Helper.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)PropertySheet.Props" />
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="$(MSBuildThisFileDirectory)CppTest.dll.manifest" />
   </ItemGroup>
 </Project>

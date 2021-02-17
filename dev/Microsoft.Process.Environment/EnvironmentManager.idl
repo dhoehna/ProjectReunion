@@ -1,5 +1,6 @@
 ﻿namespace Microsoft.ProjectReunion
 {
+
     [default_interface]
     runtimeclass EnvironmentManager
     {
