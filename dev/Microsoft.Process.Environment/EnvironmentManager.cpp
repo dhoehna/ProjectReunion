@@ -2,6 +2,7 @@
 #undef GetEnvironmentVariableW
 #include <EnvironmentManager.h>
 #include <EnvironmentManager.g.cpp>
+#include <EnvironmentVariableChangeTracker.h>
 
 using namespace winrt::Windows::Foundation::Collections;
 
@@ -117,7 +118,37 @@ namespace winrt::Microsoft::ProjectReunion::implementation
 
     void EnvironmentManager::SetEnvironmentVariable(hstring const& name, hstring const& value)
     {
-        throw hresult_not_implemented();
+        auto setEV = [&, name, value, this]()
+        {
+            if (m_Scope == Scope::Process)
+            {
+                BOOL result = ::SetEnvironmentVariable(name.c_str(), value.c_str());
+
+                if (result == 0)
+                {
+                    return S_OK;
+                }
+                else
+                {
+                    RETURN_HR(HRESULT_FROM_WIN32(GetLastError()));
+                }
+            }
+
+            // m_Scope should be user or machine here.
+            wil::unique_hkey environmentVariableKey = GetRegHKeyForEVUserAndMachineScope(true);
+
+            return RegSetValueEx(
+                environmentVariableKey.get()
+            , name.c_str()
+            , 0
+            , REG_SZ
+            , reinterpret_cast<const BYTE*>(value.c_str())
+            , value.size() + 1 * sizeof(wchar_t));
+        };
+
+        EnvironmentVariableChangeTracker changeTracker(std::wstring(name), std::wstring(value), m_Scope);
+
+        THROW_IF_FAILED(changeTracker.TrackChange(setEV));
     }
 
     void EnvironmentManager::AppendToPath(hstring const& path)
