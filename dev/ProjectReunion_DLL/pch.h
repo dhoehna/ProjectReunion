@@ -17,3 +17,7 @@
 #include <winrt/Windows.ApplicationModel.Activation.h>
 #include <winrt/Windows.Storage.h>
 #include <NotificationActivationCallback.h>
+#include <sstream>
+#include <iostream>
+#include <fstream>
+#include <chrono>

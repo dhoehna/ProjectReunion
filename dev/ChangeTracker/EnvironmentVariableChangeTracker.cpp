@@ -12,6 +12,26 @@ namespace winrt::Microsoft::ProjectReunion::implementation
 
         EnvironmentManager::Scope scopeOfChange = static_cast<EnvironmentManager::Scope>(scope);
 
+        UINT32 sizeOfBuffer{};
+        long fullNameResult = ::GetCurrentPackageFullName(&sizeOfBuffer, nullptr);
+
+        // Check if we need to track the changes.
+        // If we do need to track the changes get the Package Full Name
+        if (fullNameResult == APPMODEL_ERROR_NO_PACKAGE)
+        {
+            m_ShouldTrackChange = false;
+        }
+        else if (fullNameResult == ERROR_INSUFFICIENT_BUFFER)
+        {
+            std::unique_ptr<PWSTR> packageFullName(new PWSTR[sizeOfBuffer]);
+            THROW_HR(HRESULT_FROM_WIN32(::GetCurrentPackageFullName(&sizeOfBuffer, *packageFullName.get())));
+            m_PackageFullName = *packageFullName;
+        }
+        else
+        {
+            THROW_HR(HRESULT_FROM_WIN32(fullNameResult));
+        }
+
         m_Scope = scopeOfChange;
         m_Key = key;
         m_Value = valueToSet;
@@ -19,32 +39,96 @@ namespace winrt::Microsoft::ProjectReunion::implementation
 
     HRESULT EnvironmentVariableChangeTracker::TrackChange(std::function<HRESULT(void)> callback)
     {
-        wil::unique_hkey keyToTrackChanges;
-        if (m_Scope == EnvironmentManager::Scope::Process || m_Scope == EnvironmentManager::Scope::User)
+        if (m_ShouldTrackChange)
         {
-            RETURN_IF_FAILED(HRESULT_FROM_WIN32(RegCreateKeyEx(HKEY_CURRENT_USER
-            , L"Software\\ChangeTracker\\EnvironmentVariables"
-            , 0
-            , nullptr
-            , REG_OPTION_NON_VOLATILE
-            , KEY_WRITE
-            , nullptr
-            , keyToTrackChanges.addressof()
-            , nullptr)));
-        }
-        else //Machine level scope
-        {
-            RETURN_IF_FAILED(HRESULT_FROM_WIN32(RegCreateKeyEx(HKEY_LOCAL_MACHINE
-                , L"Software\\ChangeTracker\\EnvironmentVariables"
+            std::wstring originalValue = GetOriginalValueOfEV();
+            wil::unique_hkey regLocationToWriteChange = GetKeyForTrackingChange();
+
+            if (m_Scope == EnvironmentManager::Scope::Process)
+            {
+                LSTATUS setResult = RegSetValueEx(regLocationToWriteChange.get()
+                    , L"Scope"
+                    , 0
+                    , REG_SZ
+                    , reinterpret_cast<const BYTE*>(L"Process"), 8 * sizeof(wchar_t));
+
+                if (setResult != ERROR_SUCCESS)
+                {
+                    DWORD lastError = GetLastError();
+                    RETURN_HR(HRESULT_FROM_WIN32(lastError));
+                }
+            }
+            else if (m_Scope == EnvironmentManager::Scope::User)
+            {
+                LSTATUS setResult = RegSetValueEx(regLocationToWriteChange.get()
+                    , L"Scope"
+                    , 0
+                    , REG_SZ
+                    , reinterpret_cast<const BYTE*>(L"User"), 5 * sizeof(wchar_t));
+
+                if (setResult != ERROR_SUCCESS)
+                {
+                    DWORD lastError = GetLastError();
+                    RETURN_HR(HRESULT_FROM_WIN32(lastError));
+                }
+            }
+            else
+            {
+                LSTATUS setResult = RegSetValueEx(regLocationToWriteChange.get()
+                    , L"Scope"
+                    , 0
+                    , REG_SZ
+                    , reinterpret_cast<const BYTE*>(L"Machine"), 8 * sizeof(wchar_t));
+
+                if (setResult != ERROR_SUCCESS)
+                {
+                    DWORD lastError = GetLastError();
+                    RETURN_HR(HRESULT_FROM_WIN32(lastError));
+                }
+            }
+
+
+            LSTATUS setResult = RegSetValueEx(regLocationToWriteChange.get()
+                , L"PreviousValue"
                 , 0
-                , nullptr
-                , REG_OPTION_NON_VOLATILE
-                , KEY_WRITE
-                , nullptr
-                , keyToTrackChanges.addressof()
-                , nullptr)));
+                , REG_SZ
+                , reinterpret_cast<const BYTE*>(originalValue.c_str()), (originalValue.size() + 1) * sizeof(wchar_t));
+
+            if (setResult != ERROR_SUCCESS)
+            {
+                DWORD lastError = GetLastError();
+                RETURN_HR(HRESULT_FROM_WIN32(lastError));
+            }
+
+            setResult = RegSetValueEx(regLocationToWriteChange.get()
+                , L"CurrentValue"
+                , 0
+                , REG_SZ
+                , reinterpret_cast<const BYTE*>(m_Value.c_str()), (m_Value.size() + 1) * sizeof(wchar_t));
+
+            if (setResult != ERROR_SUCCESS)
+            {
+                DWORD lastError = GetLastError();
+                RETURN_HR(HRESULT_FROM_WIN32(lastError));
+            }
+
+
+            std::chrono::nanoseconds insertionTime = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch());
+
+            setResult = RegSetValueEx(regLocationToWriteChange.get()
+                , L"InsertionTime"
+                , 0
+                , REG_QWORD
+                , reinterpret_cast<const BYTE*>(insertionTime.count()), sizeof(insertionTime.count()));
+
+            if (setResult != ERROR_SUCCESS)
+            {
+                DWORD lastError = GetLastError();
+                RETURN_HR(HRESULT_FROM_WIN32(lastError));
+            }
+
         }
 
-        return S_OK;
+        return callback();
     }
 }
