@@ -124,26 +124,34 @@ namespace winrt::Microsoft::ProjectReunion::implementation
             {
                 BOOL result = ::SetEnvironmentVariable(name.c_str(), value.c_str());
 
-                if (result == 0)
+                if (result == TRUE)
                 {
                     return S_OK;
                 }
                 else
                 {
-                    RETURN_HR(HRESULT_FROM_WIN32(GetLastError()));
+                    DWORD lastError = GetLastError();
+                    RETURN_HR(HRESULT_FROM_WIN32(lastError));
                 }
             }
 
             // m_Scope should be user or machine here.
             wil::unique_hkey environmentVariableKey = GetRegHKeyForEVUserAndMachineScope(true);
 
-            return RegSetValueEx(
+            LSTATUS setResult = RegSetValueEx(
                 environmentVariableKey.get()
             , name.c_str()
             , 0
             , REG_SZ
             , reinterpret_cast<const BYTE*>(value.c_str())
-            , value.size() + 1 * sizeof(wchar_t));
+            , static_cast<DWORD>((value.size() + 1) * sizeof(wchar_t)));
+
+            if (setResult != ERROR_SUCCESS)
+            {
+                THROW_HR(HRESULT_FROM_WIN32(setResult));
+            }
+
+            return S_OK;
         };
 
         EnvironmentVariableChangeTracker changeTracker(std::wstring(name), std::wstring(value), m_Scope);
@@ -281,17 +289,17 @@ namespace winrt::Microsoft::ProjectReunion::implementation
 
         if (needsWriteAccess)
         {
-            registrySecurity &= KEY_SET_VALUE;
+            registrySecurity |= KEY_WRITE;
         }
 
         wil::unique_hkey environmentVariablesHKey;
         if (m_Scope == Scope::User)
         {
-            THROW_IF_FAILED(HRESULT_FROM_WIN32(RegOpenKeyEx(HKEY_CURRENT_USER, USER_EV_REG_LOCATION.c_str(), 0, KEY_READ, environmentVariablesHKey.addressof())));
+            THROW_IF_FAILED(HRESULT_FROM_WIN32(RegOpenKeyEx(HKEY_CURRENT_USER, USER_EV_REG_LOCATION.c_str(), 0, registrySecurity, environmentVariablesHKey.addressof())));
         }
         else //Scope is Machine
         {
-            THROW_IF_FAILED(HRESULT_FROM_WIN32(RegOpenKeyEx(HKEY_LOCAL_MACHINE, MACHINE_EV_REG_LOCATION.c_str(), 0, KEY_READ, environmentVariablesHKey.addressof())));
+            THROW_IF_FAILED(HRESULT_FROM_WIN32(RegOpenKeyEx(HKEY_LOCAL_MACHINE, MACHINE_EV_REG_LOCATION.c_str(), 0, registrySecurity, environmentVariablesHKey.addressof())));
         }
 
         return environmentVariablesHKey;

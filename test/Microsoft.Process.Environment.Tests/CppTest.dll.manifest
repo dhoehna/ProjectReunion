@@ -8,5 +8,12 @@
             threadingModel="both"
             xmlns="urn:schemas-microsoft-com:winrt.v1" />
     </file>
+  <trustInfo xmlns="urn:schemas-microsoft-com:asm.v3">
+    <security>
+      <requestedPrivileges>
+        <requestedExecutionLevel level="highestAvailable"/>
+      </requestedPrivileges>
+    </security>
+  </trustInfo>
 
 </assembly>

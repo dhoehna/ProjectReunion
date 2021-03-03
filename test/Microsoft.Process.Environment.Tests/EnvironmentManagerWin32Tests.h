@@ -6,13 +6,10 @@ namespace ProjectReunionCppTest
     class EnvironmentManagerWin32Tests {
         BEGIN_TEST_CLASS(EnvironmentManagerWin32Tests)
             TEST_CLASS_PROPERTY(L"ActivationContext", L"CppTest.dll.manifest")
-            TEST_CLASS_PROPERTY(L"ThreadingModel", L"MTA")
+            //TEST_CLASS_PROPERTY(L"RunFixtureAs", L"Elevated")
         END_TEST_CLASS()
 
-
             TEST_METHOD_SETUP(TestSetup);
-            TEST_CLASS_SETUP(WriteWin32UserUV);
-            TEST_CLASS_CLEANUP(RemoveWin32UserUV);
 
             TEST_METHOD(TestGetForProcess);
             TEST_METHOD(TestGetForUser);
@@ -22,5 +19,7 @@ namespace ProjectReunionCppTest
             TEST_METHOD(TestGetEnvironmentVariablesForMachine);
             TEST_METHOD(TestGetEnvironmentVariableForProcess);
             TEST_METHOD(TestGetEnvironmentVariableForUser);
+            TEST_METHOD(TestSetEnvironmentVariableForProcess);
+            TEST_METHOD(TestSetEnvironmentVariableForUser);
     };
 }

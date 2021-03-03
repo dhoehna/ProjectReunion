@@ -1,34 +1,28 @@
 ﻿#include <pch.h>
-#include <EnvironmentManagerWin32Tests.h>
+#include <EnvironmentManagerCentennialTests.h>
 
 namespace ProjectReunionCppTest
 {
-    bool EnvironmentManagerWin32Tests::TestSetup()
+    void EnvironmentManagerCentennialTests::CentennialTestGetForProcess()
     {
-        winrt::init_apartment(winrt::apartment_type::single_threaded);
-        return true;
-    }
-
-    void EnvironmentManagerWin32Tests::TestGetForProcess()
-    {
-        winrt::Microsoft::ProjectReunion::EnvironmentManager environmentManager = winrt::Microsoft::ProjectReunion::EnvironmentManager::GetForProcess();
+        EnvironmentManager environmentManager = EnvironmentManager::GetForProcess();
         VERIFY_IS_NOT_NULL(environmentManager);
     }
 
-    void EnvironmentManagerWin32Tests::TestGetForUser()
+    void EnvironmentManagerCentennialTests::CentennialTestGetForUser()
     {
         EnvironmentManager environmentManager = EnvironmentManager::GetForUser();
         VERIFY_IS_NOT_NULL(environmentManager);
     }
 
 
-    void EnvironmentManagerWin32Tests::TestGetForMachine()
+    void EnvironmentManagerCentennialTests::CentennialTestGetForMachine()
     {
         EnvironmentManager environmentManager = EnvironmentManager::GetForMachine();
         VERIFY_IS_NOT_NULL(environmentManager);
     }
 
-    void EnvironmentManagerWin32Tests::TestGetEnvironmentVariablesForProcess()
+    void EnvironmentManagerCentennialTests::CentennialTestGetEnvironmentVariablesForProcess()
     {
         LPWSTR environmentVariables = GetEnvironmentStrings();
         EnvironmentVariables environmentVariablesFromWindowsAPI = GetAndFormatEnvironmentVariables(environmentVariables);
@@ -40,7 +34,7 @@ namespace ProjectReunionCppTest
 
     }
 
-    void EnvironmentManagerWin32Tests::TestGetEnvironmentVariablesForUser()
+    void EnvironmentManagerCentennialTests::CentennialTestGetEnvironmentVariablesForUser()
     {
 
         EnvironmentManager environmentmanager = EnvironmentManager::GetForUser();
@@ -52,7 +46,7 @@ namespace ProjectReunionCppTest
 
     }
 
-    void EnvironmentManagerWin32Tests::TestGetEnvironmentVariablesForMachine()
+    void EnvironmentManagerCentennialTests::CentennialTestGetEnvironmentVariablesForMachine()
     {
         EnvironmentVariables environmentVariablesFromWindowsAPI = GetEnvironmentVariablesForMachine();
 
@@ -63,22 +57,22 @@ namespace ProjectReunionCppTest
 
     }
 
-    void EnvironmentManagerWin32Tests::TestGetEnvironmentVariableForProcess()
+    void EnvironmentManagerCentennialTests::CentennialTestGetEnvironmentVariableForProcess()
     {
         WriteProcessEV();
 
         EnvironmentManager environmentManager = EnvironmentManager::GetForProcess();
-        winrt::hstring environmentValue = environmentManager.GetEnvironmentVariable(L"Hello");
+        winrt::hstring environmentValue = environmentManager.GetEnvironmentVariable(EV_KEY_NAME);
 
         RemoveProcessEV();
 
         VERIFY_ARE_EQUAL(std::wstring(EV_VALUE_NAME), environmentValue);
     }
 
-    void EnvironmentManagerWin32Tests::TestGetEnvironmentVariableForUser()
+    void EnvironmentManagerCentennialTests::CentennialTestGetEnvironmentVariableForUser()
     {
         WriteUserEV();
-
+        
         EnvironmentManager environmentManager = EnvironmentManager::GetForUser();
         winrt::hstring environmentValue = environmentManager.GetEnvironmentVariable(EV_KEY_NAME);
 
@@ -87,7 +81,8 @@ namespace ProjectReunionCppTest
         VERIFY_ARE_EQUAL(std::wstring(EV_VALUE_NAME), environmentValue);
     }
 
-    void EnvironmentManagerWin32Tests::TestSetEnvironmentVariableForProcess()
+
+    void EnvironmentManagerCentennialTests::CentennialTestSetEnvironmentVariableForProcess()
     {
         EnvironmentManager environmentManager = EnvironmentManager::GetForProcess();
         VERIFY_NO_THROW(environmentManager.SetEnvironmentVariable(EV_KEY_NAME, EV_VALUE_NAME));
@@ -100,7 +95,7 @@ namespace ProjectReunionCppTest
         {
             DWORD lastError = GetLastError();
 
-            std::wstring errorMessage(L"Error getting the environment variable from process scope after setting it with Environment Manager.  The error code is: ");
+            std::wstring errorMessage(L"Error getting Size of environment variable from process scope after setting it with Environment Manager.  The error code is: ");
             errorMessage += std::to_wstring(lastError);
             VERIFY_FAIL(errorMessage.c_str());
         }
@@ -120,10 +115,12 @@ namespace ProjectReunionCppTest
             VERIFY_FAIL(errorMessage.c_str());
         }
 
+        RemoveProcessEV();
+        RemoveUserChangeTrackerRegEdits(true);
         VERIFY_ARE_EQUAL(std::wstring(EV_VALUE_NAME), environmentVariableValue);
     }
 
-    void EnvironmentManagerWin32Tests::TestSetEnvironmentVariableForUser()
+    void EnvironmentManagerCentennialTests::CentennialTestSetEnvironmentVariableForUser()
     {
         EnvironmentManager environmentManager = EnvironmentManager::GetForUser();
         VERIFY_NO_THROW(environmentManager.SetEnvironmentVariable(EV_KEY_NAME, EV_VALUE_NAME));
@@ -139,7 +136,30 @@ namespace ProjectReunionCppTest
         wchar_t* environmentValue = new wchar_t[sizeOfEnvironmentValue];
         VERIFY_WIN32_SUCCEEDED(RegQueryValueEx(environmentVariablesHKey.get(), EV_KEY_NAME, 0, nullptr, (LPBYTE)environmentValue, &sizeOfEnvironmentValue));
 
+        RemoveUserEV();
+        RemoveUserChangeTrackerRegEdits(true);
+
         VERIFY_ARE_EQUAL(std::wstring(EV_VALUE_NAME), std::wstring(environmentValue));
 
     }
+
+    //void EnvironmentManagerCentennialTests::CentennialTestSetEnvironmentVariableForMachine()
+    //{
+    //    EnvironmentManager environmentManager = EnvironmentManager::GetForMachine();
+    //    VERIFY_NO_THROW(environmentManager.SetEnvironmentVariable(EV_KEY_NAME, EV_VALUE_NAME));
+
+    //    wil::unique_hkey environmentVariablesHKey;
+    //    VERIFY_WIN32_SUCCEEDED(RegOpenKeyEx(HKEY_LOCAL_MACHINE, MACHINE_EV_REG_LOCATION, 0, KEY_READ, environmentVariablesHKey.addressof()));
+
+    //    DWORD sizeOfEnvironmentValue{};
+
+    //    // See how big we need the buffer to be
+    //    VERIFY_WIN32_SUCCEEDED(RegQueryValueEx(environmentVariablesHKey.get(), EV_KEY_NAME, 0, nullptr, nullptr, &sizeOfEnvironmentValue));
+
+    //    wchar_t* environmentValue = new wchar_t[sizeOfEnvironmentValue];
+    //    VERIFY_WIN32_SUCCEEDED(RegQueryValueEx(environmentVariablesHKey.get(), EV_KEY_NAME, 0, nullptr, (LPBYTE)environmentValue, &sizeOfEnvironmentValue));
+
+    //    VERIFY_ARE_EQUAL(std::wstring(EV_VALUE_NAME), std::wstring(environmentValue));
+
+    //}
 }

@@ -46,19 +46,44 @@ namespace winrt::Microsoft::ProjectReunion::implementation
             subKeyStream << m_PackageFullName;
             subKeyStream << "\\";
             subKeyStream << m_Key;
+            subKeyStream << "\\";
+
+            if (m_Scope == EnvironmentManager::Scope::Process)
+            {
+                subKeyStream << L"Process";
+            }
+            else if (m_Scope == EnvironmentManager::Scope::User)
+            {
+                subKeyStream << L"User";
+            }
+            else
+            {
+                subKeyStream << L"Machine";
+            }
+
+            subKeyStream << "\\";
+
+            auto subKeyIntermediate = subKeyStream.str();
+            auto subKey = subKeyIntermediate.c_str();
 
             wil::unique_hkey keyToTrackChanges;
             if (m_Scope == EnvironmentManager::Scope::Process || m_Scope == EnvironmentManager::Scope::User)
             {
-                THROW_IF_FAILED(HRESULT_FROM_WIN32(RegCreateKeyEx(HKEY_CURRENT_USER
-                    , subKeyStream.str().c_str()
+                DWORD disposition = 0;
+                LSTATUS getResult = RegCreateKeyEx(HKEY_CURRENT_USER
+                    , subKey
                     , 0
                     , nullptr
                     , REG_OPTION_NON_VOLATILE
-                    , KEY_WRITE
+                    , KEY_ALL_ACCESS
                     , nullptr
-                    , keyToTrackChanges.addressof()
-                    , nullptr)));
+                    , keyToTrackChanges.put()
+                    , &disposition);
+
+                if (getResult != ERROR_SUCCESS)
+                {
+                    THROW_HR(HRESULT_FROM_WIN32(getResult));
+                }
             }
             else //Machine level scope
             {
@@ -69,7 +94,7 @@ namespace winrt::Microsoft::ProjectReunion::implementation
                     , REG_OPTION_NON_VOLATILE
                     , KEY_WRITE
                     , nullptr
-                    , keyToTrackChanges.addressof()
+                    , keyToTrackChanges.put()
                     , nullptr)));
             }
 

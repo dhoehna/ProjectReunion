@@ -78,6 +78,37 @@ inline EnvironmentVariables GetEnvironmentVariablesFromRegistry(HKEY hKey)
     return environmentVariables.GetView();
 }
 
+inline wil::unique_hkey GetKeyForTrackingChange(bool isUserOrMachineScope)
+{
+    wil::unique_hkey keyToTrackChanges;
+    if (isUserOrMachineScope)
+    {
+        THROW_IF_FAILED(HRESULT_FROM_WIN32(RegCreateKeyEx(HKEY_CURRENT_USER
+            , L"Software"
+            , 0
+            , nullptr
+            , REG_OPTION_NON_VOLATILE
+            , KEY_ALL_ACCESS
+            , nullptr
+            , keyToTrackChanges.put()
+            , nullptr)));
+    }
+    else //Machine level scope
+    {
+        THROW_IF_FAILED(HRESULT_FROM_WIN32(RegCreateKeyEx(HKEY_LOCAL_MACHINE
+            , L"Software"
+            , 0
+            , nullptr
+            , REG_OPTION_NON_VOLATILE
+            , KEY_WRITE
+            , nullptr
+            , keyToTrackChanges.put()
+            , nullptr)));
+    }
+
+    return keyToTrackChanges;
+}
+
 inline void WriteUserEV()
 {
     wil::unique_hkey userEnvironmentVariablesHKey;
@@ -92,6 +123,13 @@ inline void RemoveUserEV()
     VERIFY_WIN32_SUCCEEDED(RegDeleteValueW(userEnvironmentVariablesHKey.get(), EV_KEY_NAME));
 }
 
+inline void RemoveUserChangeTrackerRegEdits(bool isUserOrProcess)
+{
+    wil::unique_hkey hKey = GetKeyForTrackingChange(isUserOrProcess);
+
+    VERIFY_WIN32_SUCCEEDED(RegDeleteTree(hKey.get(), L"ChangeTracker"));
+}
+
 inline void WriteMachineEV()
 {
     wil::unique_hkey machineEnvironmentVariablesHKey;
@@ -104,6 +142,16 @@ inline void RemoveMachineEV()
     wil::unique_hkey machineEnvironmentVariablesHKey;
     VERIFY_WIN32_SUCCEEDED(RegOpenKeyEx(HKEY_LOCAL_MACHINE, MACHINE_EV_REG_LOCATION, 0, KEY_WRITE, machineEnvironmentVariablesHKey.addressof()));
     VERIFY_WIN32_SUCCEEDED(RegDeleteValueW(machineEnvironmentVariablesHKey.get(), EV_KEY_NAME));
+}
+
+inline void WriteProcessEV()
+{
+    SetEnvironmentVariable(EV_KEY_NAME, EV_VALUE_NAME);
+}
+
+inline void RemoveProcessEV()
+{
+    SetEnvironmentVariable(EV_KEY_NAME, nullptr);
 }
 
 

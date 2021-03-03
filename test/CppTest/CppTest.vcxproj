@@ -331,6 +331,19 @@
       <Project>{7c502995-59c3-483b-86ba-815985353633}</Project>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <Text Update="D:\git\dhoehna\ProjectReunion\test\Microsoft.Process.Environment.Tests\CentennialAppxManifest.pkg.xml">
+      <DeploymentContent>true</DeploymentContent>
+    </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Update="D:\git\dhoehna\ProjectReunion\test\Microsoft.Process.Environment.Tests\AppxManifest.pkg.xml">
+      <DeploymentContent>true</DeploymentContent>
+    </Xml>
+    <Xml Update="D:\git\dhoehna\ProjectReunion\test\Microsoft.Process.Environment.Tests\CppTest.dll.manifest">
+      <DeploymentContent>true</DeploymentContent>
+    </Xml>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="..\..\packages\Microsoft.Windows.ImplementationLibrary.1.0.200519.2\build\native\Microsoft.Windows.ImplementationLibrary.targets" Condition="Exists('..\..\packages\Microsoft.Windows.ImplementationLibrary.1.0.200519.2\build\native\Microsoft.Windows.ImplementationLibrary.targets')" />
