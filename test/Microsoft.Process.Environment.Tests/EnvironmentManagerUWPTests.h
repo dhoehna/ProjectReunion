@@ -8,7 +8,7 @@ namespace ProjectReunionCppTest
             TEST_CLASS_PROPERTY(L"ActivationContext", L"CppTest.dll.manifest")
             TEST_CLASS_PROPERTY(L"RunAs", L"UAP")
             TEST_CLASS_PROPERTY(L"UAP:AppXManifest", L"AppxManifest.pkg.xml")
-        END_TEST_CLASS()
+            END_TEST_CLASS()
 
         TEST_METHOD(UWPTestGetForProcess);
         TEST_METHOD(UWPTestGetForUser);
@@ -17,5 +17,7 @@ namespace ProjectReunionCppTest
         TEST_METHOD(UWPTestGetEnvironmentVariablesForUser);
         TEST_METHOD(UWPTestGetEnvironmentVariablesForMachine);
         TEST_METHOD(UWPTestGetEnvironmentVariableForProcess);
+        //TEST_METHOD(UWPTestGetEnvironmentVariableForUser);
+        //TEST_METHOD(UWPTestGetEnvironmentVariableForMachine);
     };
 }

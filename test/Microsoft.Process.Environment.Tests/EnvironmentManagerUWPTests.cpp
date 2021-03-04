@@ -68,4 +68,16 @@ namespace ProjectReunionCppTest
 
         VERIFY_ARE_EQUAL(std::wstring(EV_VALUE_NAME), environmentValue);
     }
+
+    //void EnvironmentManagerUWPTests::UWPTestGetEnvironmentVariableForUser()
+    //{
+    //    WriteProcessEV();
+
+    //    EnvironmentManager forProcess = EnvironmentManager::GetForProcess();
+    //    winrt::hstring environmentValue = forProcess.GetEnvironmentVariable(EV_KEY_NAME);
+
+    //    RemoveProcessEV();
+
+    //    VERIFY_ARE_EQUAL(std::wstring(EV_VALUE_NAME), environmentValue);
+    //}
 }

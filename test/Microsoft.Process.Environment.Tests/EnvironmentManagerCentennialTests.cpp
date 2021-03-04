@@ -122,9 +122,12 @@ namespace ProjectReunionCppTest
 
     void EnvironmentManagerCentennialTests::CentennialTestSetEnvironmentVariableForUser()
     {
+        MessageBoxEx(NULL, L"In here", L"In here", 0, 0);
+        // Set 1 value.
         EnvironmentManager environmentManager = EnvironmentManager::GetForUser();
         VERIFY_NO_THROW(environmentManager.SetEnvironmentVariable(EV_KEY_NAME, EV_VALUE_NAME));
 
+        // Retreve the value
         wil::unique_hkey environmentVariablesHKey;
         VERIFY_WIN32_SUCCEEDED(RegOpenKeyEx(HKEY_CURRENT_USER, USER_EV_REG_LOCATION, 0, KEY_READ, environmentVariablesHKey.addressof()));
 
@@ -133,13 +136,29 @@ namespace ProjectReunionCppTest
         // See how big we need the buffer to be
         VERIFY_WIN32_SUCCEEDED(RegQueryValueEx(environmentVariablesHKey.get(), EV_KEY_NAME, 0, nullptr, nullptr, &sizeOfEnvironmentValue));
 
-        wchar_t* environmentValue = new wchar_t[sizeOfEnvironmentValue];
-        VERIFY_WIN32_SUCCEEDED(RegQueryValueEx(environmentVariablesHKey.get(), EV_KEY_NAME, 0, nullptr, (LPBYTE)environmentValue, &sizeOfEnvironmentValue));
+        std::unique_ptr<wchar_t[]> environmentValue(new wchar_t[sizeOfEnvironmentValue]);
+        VERIFY_WIN32_SUCCEEDED(RegQueryValueEx(environmentVariablesHKey.get(), EV_KEY_NAME, 0, nullptr, (LPBYTE)environmentValue.get(), &sizeOfEnvironmentValue));
 
-        RemoveUserEV();
-        RemoveUserChangeTrackerRegEdits(true);
+        VERIFY_ARE_EQUAL(std::wstring(EV_VALUE_NAME), std::wstring(environmentValue.get()));
 
-        VERIFY_ARE_EQUAL(std::wstring(EV_VALUE_NAME), std::wstring(environmentValue));
+        // Update the value
+        VERIFY_NO_THROW(environmentManager.SetEnvironmentVariable(EV_KEY_NAME, EV_VALUE_NAME2));
+
+        // Retreve the value
+        VERIFY_WIN32_SUCCEEDED(RegOpenKeyEx(HKEY_CURRENT_USER, USER_EV_REG_LOCATION, 0, KEY_READ, environmentVariablesHKey.addressof()));
+
+        sizeOfEnvironmentValue = 0;
+
+        // See how big we need the buffer to be
+        VERIFY_WIN32_SUCCEEDED(RegQueryValueEx(environmentVariablesHKey.get(), EV_KEY_NAME, 0, nullptr, nullptr, &sizeOfEnvironmentValue));
+
+        environmentValue.reset(new wchar_t[sizeOfEnvironmentValue]);
+        VERIFY_WIN32_SUCCEEDED(RegQueryValueEx(environmentVariablesHKey.get(), EV_KEY_NAME, 0, nullptr, (LPBYTE)environmentValue.get(), &sizeOfEnvironmentValue));
+
+        VERIFY_ARE_EQUAL(std::wstring(EV_VALUE_NAME2), std::wstring(environmentValue.get()));
+
+        //RemoveUserEV();
+        //RemoveUserChangeTrackerRegEdits(true);
 
     }
 

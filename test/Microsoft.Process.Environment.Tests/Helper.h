@@ -14,6 +14,9 @@ inline const wchar_t* EV_KEY_NAME = L"Hello";
 inline const wchar_t* EV_VALUE_NAME = L"YOLO";
 inline const DWORD EV_VALUE_NAME_LENGTH_WITH_NULL = 5;
 
+inline const wchar_t* EV_VALUE_NAME2 = L"YOLO2";
+inline const DWORD EV_VALUE_NAME2_LENGTH_WITH_NULL = 6;
+
 inline EnvironmentVariables GetEnvironmentVariablesFromRegistry(HKEY hKey)
 {
     StringMap environmentVariables;
@@ -233,7 +236,6 @@ inline void CompareIMapViews(EnvironmentVariables fromWinRT, EnvironmentVariable
         return;
     }
 
-    //MessageBoxEx(NULL, L"In here", L"In here", 0, 0);
     auto winRTIterator = fromWinRT.First();
     do
     {

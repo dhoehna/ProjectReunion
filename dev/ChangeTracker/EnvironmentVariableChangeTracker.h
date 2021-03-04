@@ -39,7 +39,7 @@ namespace winrt::Microsoft::ProjectReunion::implementation
             return environmentVariablesHKey;
         }
 
-        wil::unique_hkey GetKeyForTrackingChange()
+        wil::unique_hkey GetKeyForTrackingChange(_Out_ bool& isCreatingEVForPackage)
         {
             std::wstringstream subKeyStream;
             subKeyStream << L"Software\\ChangeTracker\\EnvironmentVariables\\";
@@ -66,10 +66,10 @@ namespace winrt::Microsoft::ProjectReunion::implementation
             auto subKeyIntermediate = subKeyStream.str();
             auto subKey = subKeyIntermediate.c_str();
 
+            DWORD disposition;
             wil::unique_hkey keyToTrackChanges;
             if (m_Scope == EnvironmentManager::Scope::Process || m_Scope == EnvironmentManager::Scope::User)
             {
-                DWORD disposition = 0;
                 LSTATUS getResult = RegCreateKeyEx(HKEY_CURRENT_USER
                     , subKey
                     , 0
@@ -95,7 +95,16 @@ namespace winrt::Microsoft::ProjectReunion::implementation
                     , KEY_WRITE
                     , nullptr
                     , keyToTrackChanges.put()
-                    , nullptr)));
+                    , &disposition)));
+            }
+
+            if (disposition == REG_CREATED_NEW_KEY)
+            {
+                isCreatingEVForPackage = true;
+            }
+            else
+            {
+                isCreatingEVForPackage = false;
             }
 
             return keyToTrackChanges;
