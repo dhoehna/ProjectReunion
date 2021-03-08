@@ -118,11 +118,29 @@ namespace winrt::Microsoft::ProjectReunion::implementation
 
     void EnvironmentManager::SetEnvironmentVariable(hstring const& name, hstring const& value)
     {
+        // If we are running in process scope it is okay to
+        // set EV's because they will not be tracked.
+
+        // Disallow sets if current OS is 20H0 or lower because
+        // tracking EV changes relies on a feature in builds above 20H0
+        if (m_Scope != Scope::Process && IsCurrentOS20H2OrLower())
+        {
+            THROW_HR(HRESULT_FROM_WIN32(E_NOTIMPL));
+        }
+
         auto setEV = [&, name, value, this]()
         {
             if (m_Scope == Scope::Process)
             {
-                BOOL result = ::SetEnvironmentVariable(name.c_str(), value.c_str());
+                BOOL result = FALSE;
+                if (!value.empty())
+                {
+                    result = ::SetEnvironmentVariable(name.c_str(), value.c_str());
+                }
+                else
+                {
+                    result = ::SetEnvironmentVariable(name.c_str(), nullptr);
+                }
 
                 if (result == TRUE)
                 {
@@ -138,17 +156,20 @@ namespace winrt::Microsoft::ProjectReunion::implementation
             // m_Scope should be user or machine here.
             wil::unique_hkey environmentVariableKey = GetRegHKeyForEVUserAndMachineScope(true);
 
-            LSTATUS setResult = RegSetValueEx(
-                environmentVariableKey.get()
-            , name.c_str()
-            , 0
-            , REG_SZ
-            , reinterpret_cast<const BYTE*>(value.c_str())
-            , static_cast<DWORD>((value.size() + 1) * sizeof(wchar_t)));
-
-            if (setResult != ERROR_SUCCESS)
+            if (!value.empty())
             {
-                THROW_HR(HRESULT_FROM_WIN32(setResult));
+                THROW_IF_FAILED(HRESULT_FROM_WIN32(RegSetValueEx(
+                    environmentVariableKey.get()
+                    , name.c_str()
+                    , 0
+                    , REG_SZ
+                    , reinterpret_cast<const BYTE*>(value.c_str())
+                    , static_cast<DWORD>((value.size() + 1) * sizeof(wchar_t)))));
+            }
+            else
+            {
+                THROW_IF_FAILED(HRESULT_FROM_WIN32(RegDeleteValue(environmentVariableKey.get()
+                , name.c_str())));
             }
 
             return S_OK;
@@ -221,7 +242,7 @@ namespace winrt::Microsoft::ProjectReunion::implementation
         // using a do/while or a while with a prime
         // because there is no chance of the loop iterating more than
         // is needed AND the size of the name and value arrays are
-        // only as big as the bigges name or value.
+        // only as big as the biggest name or value.
 
         DWORD sizeOfLongestNameInCharacters;
         DWORD sizeOfLongestValueInCharacters;

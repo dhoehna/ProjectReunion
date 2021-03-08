@@ -35,6 +35,36 @@ namespace winrt::Microsoft::ProjectReunion::implementation
         StringMap GetProcessEnvironmentVariables();
         StringMap GetUserOrMachineEnvironmentVariables();
         wil::unique_hkey GetRegHKeyForEVUserAndMachineScope(bool needsWriteAccess = false);
+
+        bool IsCurrentOS20H2OrLower()
+        {
+            OSVERSIONINFOEXW osvi = { sizeof(osvi), 0, 0, 0, 0, {0}, 0, 0 };
+            DWORDLONG const dwlConditionMask = VerSetConditionMask(0, VER_BUILDNUMBER, VER_LESS_EQUAL);
+            osvi.dwBuildNumber = 19042;
+
+            BOOL versionVerification = VerifyVersionInfoW(&osvi, VER_BUILDNUMBER, dwlConditionMask);
+
+            // If the OS the API is running on is 20H2 or lower
+            if (versionVerification != 0)
+            {
+                return true;
+            }
+            else
+            {
+                // Either the OS is higher than 20H2 or there is an error.
+                DWORD error = GetLastError();
+
+                if (error == ERROR_OLD_WIN_VERSION)
+                {
+                    return false;
+                }
+                else
+                {
+                    THROW_HR(HRESULT_FROM_WIN32(error));
+                }
+
+            }
+        }
     };
 }
 namespace winrt::Microsoft::ProjectReunion::factory_implementation

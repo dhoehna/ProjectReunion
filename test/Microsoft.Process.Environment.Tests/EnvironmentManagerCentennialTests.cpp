@@ -115,9 +115,52 @@ namespace ProjectReunionCppTest
             VERIFY_FAIL(errorMessage.c_str());
         }
 
+        VERIFY_ARE_EQUAL(std::wstring(EV_VALUE_NAME), environmentVariableValue);
+
+        // Update the environment variable
+        VERIFY_NO_THROW(environmentManager.SetEnvironmentVariable(EV_KEY_NAME, EV_VALUE_NAME2));
+
+
+        // Get the size of the buffer.
+        sizeNeededInCharacters = ::GetEnvironmentVariable(EV_KEY_NAME, nullptr, 0);
+
+        // If we got an error
+        if (sizeNeededInCharacters == 0)
+        {
+            DWORD lastError = GetLastError();
+
+            std::wstring errorMessage(L"Error getting Size of environment variable from process scope after updating it with Environment Manager.  The error code is: ");
+            errorMessage += std::to_wstring(lastError);
+            VERIFY_FAIL(errorMessage.c_str());
+        }
+
+        // Remove the trailing \0 because this will go into an hstring.
+        environmentVariableValue.resize(sizeNeededInCharacters - 1);
+        getResult = ::GetEnvironmentVariable(EV_KEY_NAME, &environmentVariableValue[0], sizeNeededInCharacters);
+
+        if (getResult == 0)
+        {
+            DWORD lastError = GetLastError();
+
+            std::wstring errorMessage(L"Error getting the environment variable from process scope after updating it with Environment Manager.  The error code is: ");
+            errorMessage += std::to_wstring(lastError);
+            VERIFY_FAIL(errorMessage.c_str());
+        }
+
+        VERIFY_ARE_EQUAL(std::wstring(EV_VALUE_NAME2), environmentVariableValue);
+
+
+        // Remove the value
+        // setting the value to empty is the same as deleting the variable
+        VERIFY_NO_THROW(environmentManager.SetEnvironmentVariable(EV_KEY_NAME, L""));
+
+        // Retreve the value
+        VERIFY_ARE_EQUAL(0, ::GetEnvironmentVariable(EV_KEY_NAME, nullptr, 0));
+
+        VERIFY_ARE_EQUAL(ERROR_ENVVAR_NOT_FOUND, GetLastError());
+
         RemoveProcessEV();
         RemoveUserChangeTrackerRegEdits(true);
-        VERIFY_ARE_EQUAL(std::wstring(EV_VALUE_NAME), environmentVariableValue);
     }
 
     void EnvironmentManagerCentennialTests::CentennialTestSetEnvironmentVariableForUser()
@@ -139,6 +182,7 @@ namespace ProjectReunionCppTest
         std::unique_ptr<wchar_t[]> environmentValue(new wchar_t[sizeOfEnvironmentValue]);
         VERIFY_WIN32_SUCCEEDED(RegQueryValueEx(environmentVariablesHKey.get(), EV_KEY_NAME, 0, nullptr, (LPBYTE)environmentValue.get(), &sizeOfEnvironmentValue));
 
+        // Test the value
         VERIFY_ARE_EQUAL(std::wstring(EV_VALUE_NAME), std::wstring(environmentValue.get()));
 
         // Update the value
@@ -157,8 +201,16 @@ namespace ProjectReunionCppTest
 
         VERIFY_ARE_EQUAL(std::wstring(EV_VALUE_NAME2), std::wstring(environmentValue.get()));
 
-        //RemoveUserEV();
-        //RemoveUserChangeTrackerRegEdits(true);
+
+        // Remove the value
+        // setting the value to empty is the same as deleting the variable
+        VERIFY_NO_THROW(environmentManager.SetEnvironmentVariable(EV_KEY_NAME, L""));
+
+        // Retreve the value
+        VERIFY_ARE_EQUAL(ERROR_FILE_NOT_FOUND, (RegQueryValueEx(environmentVariablesHKey.get(), EV_KEY_NAME, 0, nullptr, nullptr, &sizeOfEnvironmentValue)));
+
+
+        RemoveUserChangeTrackerRegEdits(true);
 
     }
 

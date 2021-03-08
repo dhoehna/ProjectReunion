@@ -4,6 +4,18 @@
 
 namespace ProjectReunionCppTest
 {
+    //bool EnvironmentManagerUWPTests::ClassSetup()
+    //{
+    //    WriteUserEV();
+    //    return true;
+    //}
+
+    //bool EnvironmentManagerUWPTests::ClassCleanup()
+    //{
+    //    RemoveUserEV();
+    //    return true;
+    //}
+
     void EnvironmentManagerUWPTests::UWPTestGetForProcess()
     {
         EnvironmentManager environmentManager = EnvironmentManager::GetForProcess();
@@ -61,8 +73,8 @@ namespace ProjectReunionCppTest
     {
         WriteProcessEV();
 
-        EnvironmentManager forProcess = EnvironmentManager::GetForProcess();
-        winrt::hstring environmentValue = forProcess.GetEnvironmentVariable(EV_KEY_NAME);
+        EnvironmentManager environmentMananger = EnvironmentManager::GetForProcess();
+        winrt::hstring environmentValue = environmentMananger.GetEnvironmentVariable(EV_KEY_NAME);
 
         RemoveProcessEV();
 
@@ -73,11 +85,22 @@ namespace ProjectReunionCppTest
     //{
     //    WriteProcessEV();
 
-    //    EnvironmentManager forProcess = EnvironmentManager::GetForProcess();
-    //    winrt::hstring environmentValue = forProcess.GetEnvironmentVariable(EV_KEY_NAME);
+    //    EnvironmentManager environmentMananger = EnvironmentManager::GetForProcess();
+    //    winrt::hstring environmentValue = environmentMananger.GetEnvironmentVariable(EV_KEY_NAME);
 
     //    RemoveProcessEV();
 
     //    VERIFY_ARE_EQUAL(std::wstring(EV_VALUE_NAME), environmentValue);
     //}
+
+    void EnvironmentManagerUWPTests::UWPTestSetEnvironmentVariableForProcess()
+    {
+
+        EnvironmentManager environmentMananger = EnvironmentManager::GetForProcess();
+        environmentMananger.SetEnvironmentVariable(EV_KEY_NAME, EV_VALUE_NAME);
+        winrt::hstring environmentValue = environmentMananger.GetEnvironmentVariable(EV_KEY_NAME);
+
+
+        VERIFY_ARE_EQUAL(std::wstring(EV_VALUE_NAME), environmentValue);
+    }
 }

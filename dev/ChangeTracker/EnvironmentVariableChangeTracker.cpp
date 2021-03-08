@@ -55,7 +55,7 @@ namespace winrt::Microsoft::ProjectReunion::implementation
         UINT32 sizeOfBuffer{};
         long fullNameResult = ::GetCurrentPackageFullName(&sizeOfBuffer, nullptr);
 
-        if (fullNameResult == APPMODEL_ERROR_NO_PACKAGE)
+        if (scope == EnvironmentManager::Scope::Process || fullNameResult == APPMODEL_ERROR_NO_PACKAGE)
         {
             m_ShouldTrackChange = false;
         }
@@ -87,8 +87,9 @@ namespace winrt::Microsoft::ProjectReunion::implementation
             // will update an EV.  If this is the case we don't need to store
             // the previous value since we already did that.
             // All we need to do is record the new value and a new insertion time.
-            bool isCreatingEVForPackage = false;
-            wil::unique_hkey regLocationToWriteChange = GetKeyForTrackingChange(isCreatingEVForPackage);
+            wil::unique_hkey regLocationToWriteChange = GetKeyForTrackingChange();
+
+            bool isCreatingEVForPackage = IsEVBeingCreated(regLocationToWriteChange.get());
 
             if (isCreatingEVForPackage)
             {

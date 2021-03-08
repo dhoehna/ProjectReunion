@@ -15,7 +15,6 @@
 		<PublisherDisplayName>Microsoft Corp.</PublisherDisplayName>
 		<Logo>taef.png</Logo>
 		<Description>TAEF Tailored Application Host Process</Description>
-        <desktop6:RegistryWriteVirtualization>disabled</desktop6:RegistryWriteVirtualization>
 	</Properties>
 	<Dependencies>
 		<TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.0.0" MaxVersionTested="12.0.0.0" />
@@ -32,6 +31,5 @@
 	</Applications>
 	<Capabilities>
 		<rescap:Capability Name="runFullTrust" />
-        <rescap:Capability Name="unvirtualizedResources" />
 	</Capabilities>
 </Package>

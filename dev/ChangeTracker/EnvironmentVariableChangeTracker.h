@@ -39,7 +39,7 @@ namespace winrt::Microsoft::ProjectReunion::implementation
             return environmentVariablesHKey;
         }
 
-        wil::unique_hkey GetKeyForTrackingChange(_Out_ bool& isCreatingEVForPackage)
+        wil::unique_hkey GetKeyForTrackingChange()
         {
             std::wstringstream subKeyStream;
             subKeyStream << L"Software\\ChangeTracker\\EnvironmentVariables\\";
@@ -66,7 +66,6 @@ namespace winrt::Microsoft::ProjectReunion::implementation
             auto subKeyIntermediate = subKeyStream.str();
             auto subKey = subKeyIntermediate.c_str();
 
-            DWORD disposition;
             wil::unique_hkey keyToTrackChanges;
             if (m_Scope == EnvironmentManager::Scope::Process || m_Scope == EnvironmentManager::Scope::User)
             {
@@ -78,7 +77,7 @@ namespace winrt::Microsoft::ProjectReunion::implementation
                     , KEY_ALL_ACCESS
                     , nullptr
                     , keyToTrackChanges.put()
-                    , &disposition);
+                    , nullptr);
 
                 if (getResult != ERROR_SUCCESS)
                 {
@@ -95,19 +94,30 @@ namespace winrt::Microsoft::ProjectReunion::implementation
                     , KEY_WRITE
                     , nullptr
                     , keyToTrackChanges.put()
-                    , &disposition)));
-            }
-
-            if (disposition == REG_CREATED_NEW_KEY)
-            {
-                isCreatingEVForPackage = true;
-            }
-            else
-            {
-                isCreatingEVForPackage = false;
+                    , nullptr)));
             }
 
             return keyToTrackChanges;
+        }
+
+        bool IsEVBeingCreated(HKEY keyToChangeTracker)
+        {
+            LSTATUS queryStatus = RegQueryValueEx(keyToChangeTracker, L"PreviousValue", 0, nullptr, nullptr, nullptr);
+
+            if (queryStatus == ERROR_FILE_NOT_FOUND)
+            {
+                return true;
+            }
+            else if (queryStatus == ERROR_SUCCESS)
+            {
+                return false;
+            }
+            else
+            {
+                THROW_HR(HRESULT_FROM_WIN32(queryStatus));
+            }
+
+
         }
 
         std::wstring GetOriginalValueOfEV()
