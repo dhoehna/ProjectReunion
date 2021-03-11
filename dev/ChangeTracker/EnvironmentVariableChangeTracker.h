@@ -20,6 +20,7 @@ namespace winrt::Microsoft::ProjectReunion::implementation
         std::wstring m_Value;
         bool m_ShouldTrackChange = false;
         std::wstring m_PackageFullName;
+        bool m_IsPathOrPathExt = false;
 
         wil::unique_hkey GetRegHKeyForEVUserAndMachineScope()
         {
@@ -48,11 +49,7 @@ namespace winrt::Microsoft::ProjectReunion::implementation
             subKeyStream << m_Key;
             subKeyStream << "\\";
 
-            if (m_Scope == EnvironmentManager::Scope::Process)
-            {
-                subKeyStream << L"Process";
-            }
-            else if (m_Scope == EnvironmentManager::Scope::User)
+            if (m_Scope == EnvironmentManager::Scope::User)
             {
                 subKeyStream << L"User";
             }
@@ -67,7 +64,7 @@ namespace winrt::Microsoft::ProjectReunion::implementation
             auto subKey = subKeyIntermediate.c_str();
 
             wil::unique_hkey keyToTrackChanges;
-            if (m_Scope == EnvironmentManager::Scope::Process || m_Scope == EnvironmentManager::Scope::User)
+            if (m_Scope == EnvironmentManager::Scope::User)
             {
                 LSTATUS getResult = RegCreateKeyEx(HKEY_CURRENT_USER
                     , subKey
@@ -120,66 +117,56 @@ namespace winrt::Microsoft::ProjectReunion::implementation
 
         }
 
+        std::wstring GetPathOrPathExtChangesFromRegistry()
+        {
+            wil::unique_hkey regLocationToWriteChange = GetKeyForTrackingChange();
+            DWORD sizeOfPathOrPathExtChanges;
+
+            // See how big we need the buffer to be
+            LSTATUS queryResult = RegQueryValueEx(regLocationToWriteChange.get(), L"AppendedValues", 0, nullptr, nullptr, &sizeOfPathOrPathExtChanges);
+
+            if (queryResult == ERROR_FILE_NOT_FOUND)
+            {
+                return L"";
+            }
+
+            if (queryResult != ERROR_SUCCESS)
+            {
+
+                THROW_HR(HRESULT_FROM_WIN32((queryResult)));
+            }
+
+
+            wchar_t* pathOrPathExtChanges = new wchar_t[sizeOfPathOrPathExtChanges];
+            THROW_IF_FAILED(HRESULT_FROM_WIN32((RegQueryValueEx(regLocationToWriteChange.get(), L"AppendedValues", 0, nullptr, (LPBYTE)pathOrPathExtChanges, &sizeOfPathOrPathExtChanges))));
+
+            return std::wstring(pathOrPathExtChanges);
+        }
+
         std::wstring GetOriginalValueOfEV()
         {
-            if (m_Scope == EnvironmentManager::Scope::Process)
+            wil::unique_hkey environmentVariableHKey = GetRegHKeyForEVUserAndMachineScope();
+
+            DWORD sizeOfEnvironmentValue;
+
+            // See how big we need the buffer to be
+            LSTATUS queryResult = RegQueryValueEx(environmentVariableHKey.get(), m_Key.c_str(), 0, nullptr, nullptr, &sizeOfEnvironmentValue);
+
+            if (queryResult != ERROR_SUCCESS)
             {
-                // Get the size of the buffer.
-                DWORD sizeNeededInCharacters = ::GetEnvironmentVariable(m_Key.c_str(), nullptr, 0);
-
-                // If we got an error
-                if (sizeNeededInCharacters == 0)
+                if (queryResult == ERROR_FILE_NOT_FOUND)
                 {
-                    DWORD lastError = GetLastError();
-
-                    if (lastError == ERROR_ENVVAR_NOT_FOUND)
-                    {
-                        return L"";
-                    }
-                    else
-                    {
-                        THROW_HR(HRESULT_FROM_WIN32(lastError));
-                    }
+                    return L"";
                 }
 
-                std::wstring environmentVariableValue;
-
-                // Remove the trailing \0
-                environmentVariableValue.resize(sizeNeededInCharacters - 1);
-                DWORD getResult = ::GetEnvironmentVariable(m_Key.c_str(), &environmentVariableValue[0], sizeNeededInCharacters);
-
-                if (getResult == 0)
-                {
-                    THROW_HR(HRESULT_FROM_WIN32(GetLastError()));
-                }
-
-                return environmentVariableValue;
+                THROW_HR(HRESULT_FROM_WIN32((queryResult)));
             }
-            else
-            {
-                wil::unique_hkey environmentVariableHKey = GetRegHKeyForEVUserAndMachineScope();
-
-                DWORD sizeOfEnvironmentValue;
-
-                // See how big we need the buffer to be
-                LSTATUS queryResult = RegQueryValueEx(environmentVariableHKey.get(), m_Key.c_str(), 0, nullptr, nullptr, &sizeOfEnvironmentValue);
-
-                if (queryResult != ERROR_SUCCESS)
-                {
-                    if (queryResult == ERROR_FILE_NOT_FOUND)
-                    {
-                        return L"";
-                    }
-
-                    THROW_HR(HRESULT_FROM_WIN32((queryResult)));
-                }
 
 
-                wchar_t* environmentValue = new wchar_t[sizeOfEnvironmentValue];
-                THROW_IF_FAILED(HRESULT_FROM_WIN32((RegQueryValueEx(environmentVariableHKey.get(), m_Key.c_str(), 0, nullptr, (LPBYTE)environmentValue, &sizeOfEnvironmentValue))));
+            wchar_t* environmentValue = new wchar_t[sizeOfEnvironmentValue];
+            THROW_IF_FAILED(HRESULT_FROM_WIN32((RegQueryValueEx(environmentVariableHKey.get(), m_Key.c_str(), 0, nullptr, (LPBYTE)environmentValue, &sizeOfEnvironmentValue))));
 
-                return environmentValue;
-            }
+            return environmentValue;
         }
     };
 }

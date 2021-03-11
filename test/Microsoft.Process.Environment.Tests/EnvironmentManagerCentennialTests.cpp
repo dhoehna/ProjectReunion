@@ -158,9 +158,6 @@ namespace ProjectReunionCppTest
         VERIFY_ARE_EQUAL(0, ::GetEnvironmentVariable(EV_KEY_NAME, nullptr, 0));
 
         VERIFY_ARE_EQUAL(ERROR_ENVVAR_NOT_FOUND, GetLastError());
-
-        RemoveProcessEV();
-        RemoveUserChangeTrackerRegEdits(true);
     }
 
     void EnvironmentManagerCentennialTests::CentennialTestSetEnvironmentVariableForUser()
@@ -210,7 +207,7 @@ namespace ProjectReunionCppTest
         VERIFY_ARE_EQUAL(ERROR_FILE_NOT_FOUND, (RegQueryValueEx(environmentVariablesHKey.get(), EV_KEY_NAME, 0, nullptr, nullptr, &sizeOfEnvironmentValue)));
 
 
-        RemoveUserChangeTrackerRegEdits(true);
+        RemoveUserTracking();
 
     }
 
@@ -233,4 +230,16 @@ namespace ProjectReunionCppTest
     //    VERIFY_ARE_EQUAL(std::wstring(EV_VALUE_NAME), std::wstring(environmentValue));
 
     //}
+
+    void EnvironmentManagerCentennialTests::CentennialTestAppendToPathForProcess()
+    {
+        EnvironmentManager environmentManager = EnvironmentManager::GetForProcess();
+        VERIFY_NO_THROW(environmentManager.AppendToPath(EV_VALUE_NAME));
+    }
+
+    void EnvironmentManagerCentennialTests::CentennialTestAppendToPathForUser()
+    {
+        EnvironmentManager environmentManager = EnvironmentManager::GetForUser();
+        VERIFY_NO_THROW(environmentManager.AppendToPath(EV_VALUE_NAME));
+    }
 }

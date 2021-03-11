@@ -68,7 +68,7 @@ namespace ProjectReunionCppTest
         WriteProcessEV();
 
         EnvironmentManager environmentManager = EnvironmentManager::GetForProcess();
-        winrt::hstring environmentValue = environmentManager.GetEnvironmentVariable(L"Hello");
+        winrt::hstring environmentValue = environmentManager.GetEnvironmentVariable(EV_KEY_NAME);
 
         RemoveProcessEV();
 
@@ -92,35 +92,7 @@ namespace ProjectReunionCppTest
         EnvironmentManager environmentManager = EnvironmentManager::GetForProcess();
         VERIFY_NO_THROW(environmentManager.SetEnvironmentVariable(EV_KEY_NAME, EV_VALUE_NAME));
 
-        // Get the size of the buffer.
-        DWORD sizeNeededInCharacters = ::GetEnvironmentVariable(EV_KEY_NAME, nullptr, 0);
-
-        // If we got an error
-        if (sizeNeededInCharacters == 0)
-        {
-            DWORD lastError = GetLastError();
-
-            std::wstring errorMessage(L"Error getting the environment variable from process scope after setting it with Environment Manager.  The error code is: ");
-            errorMessage += std::to_wstring(lastError);
-            VERIFY_FAIL(errorMessage.c_str());
-        }
-
-        std::wstring environmentVariableValue;
-
-        // Remove the trailing \0 because this will go into an hstring.
-        environmentVariableValue.resize(sizeNeededInCharacters - 1);
-        DWORD getResult = ::GetEnvironmentVariable(EV_KEY_NAME, &environmentVariableValue[0], sizeNeededInCharacters);
-
-        if (getResult == 0)
-        {
-            DWORD lastError = GetLastError();
-
-            std::wstring errorMessage(L"Error getting the environment variable from process scope after setting it with Environment Manager.  The error code is: ");
-            errorMessage += std::to_wstring(lastError);
-            VERIFY_FAIL(errorMessage.c_str());
-        }
-
-        VERIFY_ARE_EQUAL(std::wstring(EV_VALUE_NAME), environmentVariableValue);
+        VERIFY_ARE_EQUAL(std::wstring(EV_VALUE_NAME), GetEnvironmentVariableForProcess(EV_KEY_NAME));
     }
 
     void EnvironmentManagerWin32Tests::TestSetEnvironmentVariableForUser()
@@ -128,18 +100,35 @@ namespace ProjectReunionCppTest
         EnvironmentManager environmentManager = EnvironmentManager::GetForUser();
         VERIFY_NO_THROW(environmentManager.SetEnvironmentVariable(EV_KEY_NAME, EV_VALUE_NAME));
 
-        wil::unique_hkey environmentVariablesHKey;
-        VERIFY_WIN32_SUCCEEDED(RegOpenKeyEx(HKEY_CURRENT_USER, USER_EV_REG_LOCATION, 0, KEY_READ, environmentVariablesHKey.addressof()));
+        VERIFY_ARE_EQUAL(std::wstring(EV_VALUE_NAME), GetEnvironmentVariableForUser(EV_KEY_NAME));
 
-        DWORD sizeOfEnvironmentValue{};
+        RemoveUserEV();
+        RemoveUserChangeTracking();
 
-        // See how big we need the buffer to be
-        VERIFY_WIN32_SUCCEEDED(RegQueryValueEx(environmentVariablesHKey.get(), EV_KEY_NAME, 0, nullptr, nullptr, &sizeOfEnvironmentValue));
+    }
 
-        wchar_t* environmentValue = new wchar_t[sizeOfEnvironmentValue];
-        VERIFY_WIN32_SUCCEEDED(RegQueryValueEx(environmentVariablesHKey.get(), EV_KEY_NAME, 0, nullptr, (LPBYTE)environmentValue, &sizeOfEnvironmentValue));
+    void EnvironmentManagerWin32Tests::TestAppendToPathForProcess()
+    {
+        std::wstring originalPath = GetEnvironmentVariableForProcess(PATH_NAME);
+        EnvironmentManager environmentManager = EnvironmentManager::GetForProcess();
+        VERIFY_NO_THROW(environmentManager.AppendToPath(EV_VALUE_NAME));
 
-        VERIFY_ARE_EQUAL(std::wstring(EV_VALUE_NAME), std::wstring(environmentValue));
+        std::wstring alteredPath = GetEnvironmentVariableForProcess(PATH_NAME);
 
+        VERIFY_ARE_EQUAL(originalPath.append(EV_VALUE_NAME).append(L";"), alteredPath);
+    }
+
+    void EnvironmentManagerWin32Tests::TestAppendToPathForUser()
+    {
+        std::wstring originalPath = GetEnvironmentVariableForUser(PATH_NAME);
+        EnvironmentManager environmentManager = EnvironmentManager::GetForUser();
+        VERIFY_NO_THROW(environmentManager.AppendToPath(EV_VALUE_NAME));
+
+        std::wstring alteredPath = GetEnvironmentVariableForUser(PATH_NAME);
+
+        RestoreUserPath(originalPath);
+        RemoveUserTracking();
+
+        VERIFY_ARE_EQUAL(originalPath.append(EV_VALUE_NAME).append(L";"), alteredPath);
     }
 }

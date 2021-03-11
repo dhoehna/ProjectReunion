@@ -21,5 +21,7 @@ namespace ProjectReunionCppTest
             TEST_METHOD(TestGetEnvironmentVariableForUser);
             TEST_METHOD(TestSetEnvironmentVariableForProcess);
             TEST_METHOD(TestSetEnvironmentVariableForUser);
+            TEST_METHOD(TestAppendToPathForProcess);
+            TEST_METHOD(TestAppendToPathForUser);
     };
 }

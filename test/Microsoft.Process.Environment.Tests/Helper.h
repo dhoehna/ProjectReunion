@@ -17,6 +17,73 @@ inline const DWORD EV_VALUE_NAME_LENGTH_WITH_NULL = 5;
 inline const wchar_t* EV_VALUE_NAME2 = L"YOLO2";
 inline const DWORD EV_VALUE_NAME2_LENGTH_WITH_NULL = 6;
 
+inline const wchar_t* PATH_NAME = L"Path";
+
+inline std::wstring GetEnvironmentVariableForProcess(std::wstring key)
+{
+    // Get the size of the buffer.
+    DWORD sizeNeededInCharacters = ::GetEnvironmentVariable(key.c_str(), nullptr, 0);
+
+    // If we got an error
+    if (sizeNeededInCharacters == 0)
+    {
+        DWORD lastError = GetLastError();
+
+        std::wstring errorMessage(L"Error getting the environment variable from process scope after setting it with Environment Manager.  The error code is: ");
+        errorMessage += std::to_wstring(lastError);
+        VERIFY_FAIL(errorMessage.c_str());
+    }
+
+    std::wstring environmentVariableValue;
+
+    // Remove the trailing \0 because this will go into an hstring.
+    environmentVariableValue.resize(sizeNeededInCharacters - 1);
+    DWORD getResult = ::GetEnvironmentVariable(key.c_str(), &environmentVariableValue[0], sizeNeededInCharacters);
+
+    if (getResult == 0)
+    {
+        DWORD lastError = GetLastError();
+
+        std::wstring errorMessage(L"Error getting the environment variable from process scope after setting it with Environment Manager.  The error code is: ");
+        errorMessage += std::to_wstring(lastError);
+        VERIFY_FAIL(errorMessage.c_str());
+    }
+
+    return environmentVariableValue;
+}
+
+inline std::wstring GetEnvironmentVariableForUser(std::wstring key)
+{
+    wil::unique_hkey environmentVariablesHKey;
+    VERIFY_WIN32_SUCCEEDED(RegOpenKeyEx(HKEY_CURRENT_USER, USER_EV_REG_LOCATION, 0, KEY_READ, environmentVariablesHKey.addressof()));
+
+    DWORD sizeOfEnvironmentValue{};
+
+    // See how big we need the buffer to be
+    VERIFY_WIN32_SUCCEEDED(RegQueryValueEx(environmentVariablesHKey.get(), key.c_str(), 0, nullptr, nullptr, &sizeOfEnvironmentValue));
+
+    wchar_t* environmentValue = new wchar_t[sizeOfEnvironmentValue];
+    VERIFY_WIN32_SUCCEEDED(RegQueryValueEx(environmentVariablesHKey.get(), key.c_str(), 0, nullptr, (LPBYTE)environmentValue, &sizeOfEnvironmentValue));
+
+    return std::wstring(environmentValue);
+}
+
+inline std::wstring GetEnvironmentVariableForMachine(std::wstring key)
+{
+    wil::unique_hkey environmentVariablesHKey;
+    VERIFY_WIN32_SUCCEEDED(RegOpenKeyEx(HKEY_LOCAL_MACHINE, MACHINE_EV_REG_LOCATION, 0, KEY_READ, environmentVariablesHKey.addressof()));
+
+    DWORD sizeOfEnvironmentValue{};
+
+    // See how big we need the buffer to be
+    VERIFY_WIN32_SUCCEEDED(RegQueryValueEx(environmentVariablesHKey.get(), EV_KEY_NAME, 0, nullptr, nullptr, &sizeOfEnvironmentValue));
+
+    wchar_t* environmentValue = new wchar_t[sizeOfEnvironmentValue];
+    VERIFY_WIN32_SUCCEEDED(RegQueryValueEx(environmentVariablesHKey.get(), EV_KEY_NAME, 0, nullptr, (LPBYTE)environmentValue, &sizeOfEnvironmentValue));
+
+    return std::wstring(environmentValue);
+}
+
 inline EnvironmentVariables GetEnvironmentVariablesFromRegistry(HKEY hKey)
 {
     StringMap environmentVariables;
@@ -81,13 +148,13 @@ inline EnvironmentVariables GetEnvironmentVariablesFromRegistry(HKEY hKey)
     return environmentVariables.GetView();
 }
 
-inline wil::unique_hkey GetKeyForTrackingChange(bool isUserOrMachineScope)
+inline wil::unique_hkey GetKeyForTrackingChange(bool isUser)
 {
     wil::unique_hkey keyToTrackChanges;
-    if (isUserOrMachineScope)
+    if (isUser)
     {
         THROW_IF_FAILED(HRESULT_FROM_WIN32(RegCreateKeyEx(HKEY_CURRENT_USER
-            , L"Software"
+            , L"Software\\ChangeTracker"
             , 0
             , nullptr
             , REG_OPTION_NON_VOLATILE
@@ -126,11 +193,30 @@ inline void RemoveUserEV()
     VERIFY_WIN32_SUCCEEDED(RegDeleteValueW(userEnvironmentVariablesHKey.get(), EV_KEY_NAME));
 }
 
-inline void RemoveUserChangeTrackerRegEdits(bool isUserOrProcess)
+inline void RemoveUserTracking()
 {
-    wil::unique_hkey hKey = GetKeyForTrackingChange(isUserOrProcess);
 
-    VERIFY_WIN32_SUCCEEDED(RegDeleteTree(hKey.get(), L"ChangeTracker"));
+}
+
+inline std::wstring GetUserPath()
+{
+    wil::unique_hkey userEnvironmentVariablesHKey;
+    VERIFY_WIN32_SUCCEEDED(RegOpenKeyEx(HKEY_CURRENT_USER, USER_EV_REG_LOCATION, 0, KEY_ALL_ACCESS, userEnvironmentVariablesHKey.addressof()));
+    return GetEnvironmentVariableForUser(PATH_NAME);
+}
+
+inline void RestoreUserPath(std::wstring originalPath)
+{
+    wil::unique_hkey userEnvironmentVariablesHKey;
+    VERIFY_WIN32_SUCCEEDED(RegOpenKeyEx(HKEY_CURRENT_USER, USER_EV_REG_LOCATION, 0, KEY_WRITE, userEnvironmentVariablesHKey.addressof()));
+    VERIFY_WIN32_SUCCEEDED(RegSetValueEx(userEnvironmentVariablesHKey.get(), PATH_NAME, 0, REG_EXPAND_SZ, (LPBYTE)originalPath.c_str(), (originalPath.size() + 1) * sizeof(wchar_t)));
+}
+
+inline void RemoveUserChangeTracking()
+{
+    wil::unique_hkey hKey = GetKeyForTrackingChange(true);
+
+    VERIFY_WIN32_SUCCEEDED(RegDeleteTree(hKey.get(), nullptr));
 }
 
 inline void WriteMachineEV()

@@ -22,6 +22,8 @@ namespace ProjectReunionCppTest
         TEST_METHOD(CentennialTestSetEnvironmentVariableForProcess);
         TEST_METHOD(CentennialTestSetEnvironmentVariableForUser);
         //TEST_METHOD(CentennialTestSetEnvironmentVariableForMachine);
+        TEST_METHOD(CentennialTestAppendToPathForProcess);
+        TEST_METHOD(CentennialTestAppendToPathForUser);
     };
 
 }
